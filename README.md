@@ -29,7 +29,7 @@
 
 ### 💻 For Regular Users (Windows)
 If you don't want to deal with Python and terminal commands, just download the latest standalone version:
-1. Go to the [Releases](https://github.com/rebarakaz/chrisnov-invoice/releases) page.
+1. Go to the [Releases](https://github.com/chrisnov-it/chrisnov-invoice/releases) page.
 2. Download `ChrisnovInvoice-Windows-v1.2.0.zip`.
 3. Extract and run `ChrisnovInvoice.exe`.
 
@@ -44,7 +44,7 @@ If you don't want to deal with Python and terminal commands, just download the l
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/rebarakaz/chrisnov-invoice.git
+   git clone https://github.com/chrisnov-it/chrisnov-invoice.git
    cd chrisnov-invoice
    ```
 
@@ -158,7 +158,7 @@ For more detailed information on specific features, please refer to the followin
 ## ☕ Support the Project
 If you find **Chrisnov Invoice** useful and want to support its development (and help me save up for a new PC! 💻), feel free to buy me a coffee! Any donation is greatly appreciated.
 
-[<img src="https://img.shields.io/badge/Donate-PayPal-blue.svg?style=for-the-badge&logo=paypal" alt="Donate with PayPal" />](https://paypal.me/rebarakaz)
+[<img src="https://img.shields.io/badge/Donate-PayPal-blue.svg?style=for-the-badge&logo=paypal" alt="Donate with PayPal" />](https://paypal.me/chrisnov-it)
 
 ---
 

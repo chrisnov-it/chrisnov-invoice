@@ -42,7 +42,7 @@ Welcome to the future of **Chrisnov Invoice**! We are committed to making this t
 ---
 
 > [!NOTE]
-> Have a feature request or want to contribute? Feel free to [open an issue](https://github.com/rebarakaz/chrisnov-invoice/issues)!
+> Have a feature request or want to contribute? Feel free to [open an issue](https://github.com/chrisnov-it/chrisnov-invoice/issues)!
 
 
 
