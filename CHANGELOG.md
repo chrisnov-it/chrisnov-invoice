@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 - **Operational Hardening**: Move overdue invoice status updates to a CLI command and allow `DATABASE_URL` for future PostgreSQL deployments.
 - **Version Display**: Show the app version on auth pages as well as the main app footer.
 - **Email Settings Hardening**: Keep saved SMTP passwords out of rendered forms and validate SMTP port values server-side.
+- **PDF Template Hardening**: Validate template settings, make logo controls persist correctly, add a working reset action, and escape PDF text content before rendering.
 
 ## [1.3.0] - 2026-05-20
 

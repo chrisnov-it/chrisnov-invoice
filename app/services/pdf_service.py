@@ -6,6 +6,21 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 from io import BytesIO
 import os
+from xml.sax.saxutils import escape
+
+def pdf_text(value):
+    """Escape user-controlled text before rendering it as ReportLab Paragraph markup."""
+    if value is None:
+        return ''
+    return escape(str(value)).replace('\n', '<br/>')
+
+def logo_alignment(config, fallback=TA_LEFT):
+    position = config.get('PDF_LOGO_POSITION', 'left')
+    if position == 'center':
+        return TA_CENTER
+    if position == 'right':
+        return TA_RIGHT
+    return fallback
 
 def format_currency(amount, currency_code, config):
     """Format currency amount based on currency settings"""
@@ -136,17 +151,17 @@ def generate_professional_pdf(invoice, config, buffer):
     # Header section
     header_elements = []
     if config.get('PDF_SHOW_LOGO', True):
-        add_logo_if_exists(header_elements, config)
+        add_logo_if_exists(header_elements, config, alignment=logo_alignment(config))
 
     header_elements.extend([
-        Paragraph(f"<b>{config['BUSINESS_NAME']}</b>", title_style),
-        Paragraph(config['BUSINESS_ADDRESS'], normal_style),
-        Paragraph(f"Phone: {config['BUSINESS_PHONE']}", normal_style),
-        Paragraph(f"Email: {config['BUSINESS_EMAIL']}", normal_style),
+        Paragraph(f"<b>{pdf_text(config['BUSINESS_NAME'])}</b>", title_style),
+        Paragraph(pdf_text(config['BUSINESS_ADDRESS']), normal_style),
+        Paragraph(f"Phone: {pdf_text(config['BUSINESS_PHONE'])}", normal_style),
+        Paragraph(f"Email: {pdf_text(config['BUSINESS_EMAIL'])}", normal_style),
     ])
 
     if config.get('BUSINESS_WEBSITE'):
-        header_elements.append(Paragraph(f"Website: {config['BUSINESS_WEBSITE']}", normal_style))
+        header_elements.append(Paragraph(f"Website: {pdf_text(config['BUSINESS_WEBSITE'])}", normal_style))
 
     pdf_status = 'unpaid' if invoice.status == 'draft' else invoice.status
 
@@ -154,7 +169,7 @@ def generate_professional_pdf(invoice, config, buffer):
         header_elements,
         [
             Paragraph("<b>INVOICE</b>", invoice_title_style),
-            Paragraph(f"#{invoice.invoice_number}", ParagraphStyle('InvoiceNumber', parent=styles['Normal'], fontSize=12, textColor=colors.white, alignment=TA_RIGHT, spaceBefore=6)),
+            Paragraph(f"#{pdf_text(invoice.invoice_number)}", ParagraphStyle('InvoiceNumber', parent=styles['Normal'], fontSize=12, textColor=colors.white, alignment=TA_RIGHT, spaceBefore=6)),
             Paragraph(pdf_status.upper(), ParagraphStyle('Status', parent=styles['Normal'], fontSize=10, fontName='Helvetica-Bold', textColor=colors.white, backgroundColor=status_color_map.get(pdf_status, colors.HexColor('#9ca3af')), borderWidth=0, borderRadius=3, padding=4, alignment=TA_RIGHT))
         ]
     ]]
@@ -178,16 +193,16 @@ def generate_professional_pdf(invoice, config, buffer):
     horizontal_data = [[
         [
             Paragraph("<b>Bill To:</b>", heading_style),
-            Paragraph(f"<b>{invoice.client.name}</b>", normal_style),
-            Paragraph(invoice.client.company or '', normal_style),
-            Paragraph(invoice.client.address or '', normal_style),
-            Paragraph(invoice.client.email or '', normal_style),
-            Paragraph(invoice.client.phone or '', normal_style)
+            Paragraph(f"<b>{pdf_text(invoice.client.name)}</b>", normal_style),
+            Paragraph(pdf_text(invoice.client.company), normal_style),
+            Paragraph(pdf_text(invoice.client.address), normal_style),
+            Paragraph(pdf_text(invoice.client.email), normal_style),
+            Paragraph(pdf_text(invoice.client.phone), normal_style)
         ],
         [
             Paragraph("<b>Invoice Details:</b>", heading_style),
             Table([
-                ['Invoice Number:', invoice.invoice_number],
+                ['Invoice Number:', pdf_text(invoice.invoice_number)],
                 ['Issue Date:', invoice.issue_date.strftime('%B %d, %Y')],
                 ['Due Date:', invoice.due_date.strftime('%B %d, %Y')]
             ], colWidths=[1.2*inch, 2.8*inch], style=[
@@ -211,7 +226,7 @@ def generate_professional_pdf(invoice, config, buffer):
     elements.append(Paragraph("<b>Items</b>", heading_style))
     data = [['Description', 'Quantity', 'Rate', 'Amount']]
     for item in invoice.items:
-        data.append([item.description, f"{item.quantity:.2f}", format_currency(item.rate, invoice.currency, config), format_currency(item.amount, invoice.currency, config)])
+        data.append([pdf_text(item.description), f"{item.quantity:.2f}", format_currency(item.rate, invoice.currency, config), format_currency(item.amount, invoice.currency, config)])
 
     items_table = Table(data, colWidths=[3.5*inch, 1*inch, 1*inch, 1.5*inch])
     items_table.setStyle(TableStyle([
@@ -257,12 +272,12 @@ def generate_professional_pdf(invoice, config, buffer):
     if invoice.notes:
         elements.append(Spacer(1, 0.15*inch))
         elements.append(Paragraph("<b>Notes:</b>", heading_style))
-        elements.append(Paragraph(invoice.notes, normal_style))
+        elements.append(Paragraph(pdf_text(invoice.notes), normal_style))
 
     elements.append(Spacer(1, 0.2*inch))
     footer_text = config.get('PDF_FOOTER_TEXT', f"Thank you for your business!<br/>{config['BUSINESS_NAME']}")
     footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#6b7280'), alignment=TA_CENTER)
-    elements.append(Paragraph(footer_text, footer_style))
+    elements.append(Paragraph(pdf_text(footer_text), footer_style))
 
     doc.build(elements)
     buffer.seek(0)
@@ -315,13 +330,13 @@ def generate_modern_pdf(invoice, config, buffer):
 
     sidebar_elements.extend([
         Paragraph("INVOICE", ParagraphStyle('SidebarTitle', fontName=main_font_bold, fontSize=24, textColor=accent_color, leading=28, spaceAfter=6)),
-        Paragraph(f"<b># {invoice.invoice_number}</b>", ParagraphStyle('SidebarSubtitle', fontName=main_font, fontSize=11, textColor=colors.HexColor('#374151'))),
+        Paragraph(f"<b># {pdf_text(invoice.invoice_number)}</b>", ParagraphStyle('SidebarSubtitle', fontName=main_font, fontSize=11, textColor=colors.HexColor('#374151'))),
         Spacer(1, 0.3*inch),
         Paragraph("BILL TO", heading_style),
-        Paragraph(f"<b>{invoice.client.name}</b>", normal_style),
-        Paragraph(invoice.client.company or '', normal_style),
-        Paragraph(invoice.client.address or '', normal_style),
-        Paragraph(invoice.client.email or '', normal_style),
+        Paragraph(f"<b>{pdf_text(invoice.client.name)}</b>", normal_style),
+        Paragraph(pdf_text(invoice.client.company), normal_style),
+        Paragraph(pdf_text(invoice.client.address), normal_style),
+        Paragraph(pdf_text(invoice.client.email), normal_style),
         Spacer(1, 0.3*inch),
         Paragraph("DETAILS", heading_style),
         Paragraph(f"<b>Issue Date:</b> {invoice.issue_date.strftime('%d %b %Y')}", normal_style),
@@ -331,9 +346,9 @@ def generate_modern_pdf(invoice, config, buffer):
     # --- Right Column (Main Content) ---
     main_elements = [
         Spacer(1, 0.75*inch),
-        Paragraph(f"<b>{config.get('BUSINESS_NAME', 'Your Business')}</b>", ParagraphStyle('BusinessName', fontName=main_font_bold, fontSize=16, alignment=TA_RIGHT, leading=20, spaceAfter=6)),
-        Paragraph(config.get('BUSINESS_ADDRESS', 'Your Address'), ParagraphStyle('BusinessAddress', parent=normal_style, alignment=TA_RIGHT)),
-        Paragraph(config.get('BUSINESS_EMAIL', 'your@email.com'), ParagraphStyle('BusinessEmail', parent=normal_style, alignment=TA_RIGHT)),
+        Paragraph(f"<b>{pdf_text(config.get('BUSINESS_NAME', 'Your Business'))}</b>", ParagraphStyle('BusinessName', fontName=main_font_bold, fontSize=16, alignment=TA_RIGHT, leading=20, spaceAfter=6)),
+        Paragraph(pdf_text(config.get('BUSINESS_ADDRESS', 'Your Address')), ParagraphStyle('BusinessAddress', parent=normal_style, alignment=TA_RIGHT)),
+        Paragraph(pdf_text(config.get('BUSINESS_EMAIL', 'your@email.com')), ParagraphStyle('BusinessEmail', parent=normal_style, alignment=TA_RIGHT)),
         Spacer(1, 1.5*inch),
         Paragraph("ITEMS & SERVICES", ParagraphStyle('ItemsHeader', fontName=main_font_bold, fontSize=14, textColor=colors.black, spaceAfter=12)),
     ]
@@ -342,7 +357,7 @@ def generate_modern_pdf(invoice, config, buffer):
     data = [['DESCRIPTION', 'QTY', 'RATE', 'AMOUNT']]
     for item in invoice.items:
         data.append([
-            Paragraph(item.description, normal_style),
+            Paragraph(pdf_text(item.description), normal_style),
             f"{item.quantity:.2f}",
             format_currency(item.rate, invoice.currency, config),
             format_currency(item.amount, invoice.currency, config)
@@ -390,7 +405,7 @@ def generate_modern_pdf(invoice, config, buffer):
     if invoice.notes:
         main_elements.append(Spacer(1, 0.3*inch))
         main_elements.append(Paragraph("NOTES", heading_style))
-        main_elements.append(Paragraph(invoice.notes, normal_style))
+        main_elements.append(Paragraph(pdf_text(invoice.notes), normal_style))
 
     # --- Main Layout Table ---
     layout_table = Table([[sidebar_elements, main_elements]], colWidths=[2.5*inch, 5.5*inch])
@@ -407,7 +422,7 @@ def generate_modern_pdf(invoice, config, buffer):
     # Footer (Flexible positioning)
     elements.append(Spacer(1, 0.5*inch))
     footer_text = config.get('PDF_FOOTER_TEXT', f"Thank you for your business!")
-    elements.append(Paragraph(footer_text, ParagraphStyle('Footer', fontName=main_font, fontSize=8, textColor=colors.HexColor('#6b7280'), alignment=TA_CENTER)))
+    elements.append(Paragraph(pdf_text(footer_text), ParagraphStyle('Footer', fontName=main_font, fontSize=8, textColor=colors.HexColor('#6b7280'), alignment=TA_CENTER)))
     
     doc.build(elements)
     buffer.seek(0)
@@ -439,7 +454,7 @@ def generate_minimal_pdf(invoice, config, buffer):
     
     # Header
     header_data = [[
-        Paragraph(config.get('BUSINESS_NAME', 'Your Business'), title_style),
+        Paragraph(pdf_text(config.get('BUSINESS_NAME', 'Your Business')), title_style),
         Paragraph('INVOICE', ParagraphStyle('MinimalInvoiceTitle', parent=title_style, alignment=TA_RIGHT))
     ]]
     header_table = Table(header_data, colWidths=[4*inch, 3*inch])
@@ -449,12 +464,12 @@ def generate_minimal_pdf(invoice, config, buffer):
     # Business & Client Info
     info_data = [[
         [
-            Paragraph(config.get('BUSINESS_ADDRESS', 'Your Address'), normal_style),
-            Paragraph(config.get('BUSINESS_EMAIL', 'your@email.com'), normal_style),
+            Paragraph(pdf_text(config.get('BUSINESS_ADDRESS', 'Your Address')), normal_style),
+            Paragraph(pdf_text(config.get('BUSINESS_EMAIL', 'your@email.com')), normal_style),
         ],
         [
-            Paragraph(f"<b>{invoice.client.name}</b>", normal_style),
-            Paragraph(invoice.client.address or '', normal_style),
+            Paragraph(f"<b>{pdf_text(invoice.client.name)}</b>", normal_style),
+            Paragraph(pdf_text(invoice.client.address), normal_style),
         ]
     ]]
     info_table = Table(info_data, colWidths=[3.5*inch, 3.5*inch])
@@ -466,7 +481,7 @@ def generate_minimal_pdf(invoice, config, buffer):
     details_data = [[
         [
             Paragraph("INVOICE NUMBER", heading_style),
-            Paragraph(invoice.invoice_number, normal_style),
+            Paragraph(pdf_text(invoice.invoice_number), normal_style),
         ],
         [
             Paragraph("ISSUE DATE", heading_style),
@@ -486,7 +501,7 @@ def generate_minimal_pdf(invoice, config, buffer):
     data = [['DESCRIPTION', 'QTY', 'RATE', 'AMOUNT']]
     for item in invoice.items:
         data.append([
-            Paragraph(item.description, normal_style),
+            Paragraph(pdf_text(item.description), normal_style),
             f"{item.quantity:.2f}",
             format_currency(item.rate, invoice.currency, config),
             format_currency(item.amount, invoice.currency, config)
@@ -530,11 +545,11 @@ def generate_minimal_pdf(invoice, config, buffer):
     if invoice.notes:
         elements.append(Spacer(1, 0.5*inch))
         elements.append(Paragraph("NOTES", heading_style))
-        elements.append(Paragraph(invoice.notes, normal_style))
+        elements.append(Paragraph(pdf_text(invoice.notes), normal_style))
         
     elements.append(Spacer(1, 0.5*inch))
     footer_text = config.get('PDF_FOOTER_TEXT', f"Thank you for your business!")
-    elements.append(Paragraph(footer_text, ParagraphStyle('Footer', fontName=main_font, fontSize=9, alignment=TA_CENTER)))
+    elements.append(Paragraph(pdf_text(footer_text), ParagraphStyle('Footer', fontName=main_font, fontSize=9, alignment=TA_CENTER)))
 
     doc.build(elements)
     buffer.seek(0)
@@ -564,9 +579,9 @@ def generate_elegant_pdf(invoice, config, buffer):
     if config.get('PDF_SHOW_LOGO', True):
         add_logo_if_exists(elements, config, alignment=TA_CENTER)
         
-    elements.append(Paragraph(config.get('BUSINESS_NAME', 'Your Business').upper(), title_style))
-    elements.append(Paragraph(config.get('BUSINESS_ADDRESS', 'Your Address'), subtitle_style))
-    elements.append(Paragraph(config.get('BUSINESS_EMAIL', 'your@email.com'), subtitle_style))
+    elements.append(Paragraph(pdf_text(config.get('BUSINESS_NAME', 'Your Business').upper()), title_style))
+    elements.append(Paragraph(pdf_text(config.get('BUSINESS_ADDRESS', 'Your Address')), subtitle_style))
+    elements.append(Paragraph(pdf_text(config.get('BUSINESS_EMAIL', 'your@email.com')), subtitle_style))
     
     elements.append(Spacer(1, 0.4*inch))
     elements.append(Paragraph("INVOICE", invoice_label_style))
@@ -576,9 +591,9 @@ def generate_elegant_pdf(invoice, config, buffer):
     # Column 1: Bill To
     col1 = [
         Paragraph("<b>BILLED TO:</b>", heading_style),
-        Paragraph(invoice.client.name, normal_style),
-        Paragraph(invoice.client.company or '', normal_style),
-        Paragraph(invoice.client.address or '', normal_style),
+        Paragraph(pdf_text(invoice.client.name), normal_style),
+        Paragraph(pdf_text(invoice.client.company), normal_style),
+        Paragraph(pdf_text(invoice.client.address), normal_style),
     ]
 
     # Column 2: (Empty spacer)
@@ -587,7 +602,7 @@ def generate_elegant_pdf(invoice, config, buffer):
     # Column 3: Details
     col3 = [
         Paragraph("<b>DETAILS:</b>", heading_style),
-        Paragraph(f"Invoice #: {invoice.invoice_number}", normal_style),
+        Paragraph(f"Invoice #: {pdf_text(invoice.invoice_number)}", normal_style),
         Paragraph(f"Issued: {invoice.issue_date.strftime('%B %d, %Y')}", normal_style),
         Paragraph(f"Due: {invoice.due_date.strftime('%B %d, %Y')}", normal_style),
     ]
@@ -613,7 +628,7 @@ def generate_elegant_pdf(invoice, config, buffer):
     
     for item in invoice.items:
         data.append([
-            Paragraph(item.description, normal_style),
+            Paragraph(pdf_text(item.description), normal_style),
             Paragraph(f"{item.quantity:.2f}", right_style),
             Paragraph(format_currency(item.rate, invoice.currency, config), right_style),
             Paragraph(format_currency(item.amount, invoice.currency, config), right_style)
@@ -654,14 +669,12 @@ def generate_elegant_pdf(invoice, config, buffer):
     if invoice.notes:
         elements.append(Spacer(1, 0.4*inch))
         elements.append(Paragraph("<b>NOTES</b>", heading_style))
-        elements.append(Paragraph(invoice.notes, normal_style))
+        elements.append(Paragraph(pdf_text(invoice.notes), normal_style))
         
     elements.append(Spacer(1, 0.6*inch))
     footer_text = config.get('PDF_FOOTER_TEXT', f"Thank you for your business!")
-    elements.append(Paragraph(footer_text, ParagraphStyle('Footer', fontName=main_font, fontSize=9, alignment=TA_CENTER)))
+    elements.append(Paragraph(pdf_text(footer_text), ParagraphStyle('Footer', fontName=main_font, fontSize=9, alignment=TA_CENTER)))
 
     doc.build(elements)
     buffer.seek(0)
     return buffer
-
-

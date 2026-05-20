@@ -462,21 +462,21 @@
                         <label class="block text-sm font-medium text-gray-700 mb-3">Logo Position</label>
                         <div class="space-y-3">
                             <div class="flex items-center">
-                                <input type="radio" id="logo-left" name="logo_position" value="left" checked
+                                <input type="radio" id="logo-left" name="logo_position" value="left" {% if config.get('PDF_LOGO_POSITION', 'left') == 'left' %}checked{% endif %}
                                     class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
                                 <label for="logo-left" class="ml-2 block text-sm text-gray-700">
                                     Left side of header
                                 </label>
                             </div>
                             <div class="flex items-center">
-                                <input type="radio" id="logo-center" name="logo_position" value="center"
+                                <input type="radio" id="logo-center" name="logo_position" value="center" {% if config.get('PDF_LOGO_POSITION') == 'center' %}checked{% endif %}
                                     class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
                                 <label for="logo-center" class="ml-2 block text-sm text-gray-700">
                                     Center of header
                                 </label>
                             </div>
                             <div class="flex items-center">
-                                <input type="radio" id="logo-right" name="logo_position" value="right"
+                                <input type="radio" id="logo-right" name="logo_position" value="right" {% if config.get('PDF_LOGO_POSITION') == 'right' %}checked{% endif %}
                                     class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
                                 <label for="logo-right" class="ml-2 block text-sm text-gray-700">
                                     Right side of header
@@ -495,7 +495,7 @@
                     </div>
 
                     <div class="flex items-center">
-                        <input type="checkbox" id="show_logo" name="show_logo" checked
+                        <input type="checkbox" id="show_logo" name="show_logo" {% if config.get('PDF_SHOW_LOGO', True) %}checked{% endif %}
                             class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
                         <label for="show_logo" class="ml-2 block text-sm text-gray-700">
                             Show company logo on invoices
@@ -508,7 +508,7 @@
         <!-- Save Settings -->
         <div class="mt-8 bg-white rounded-xl shadow-md p-8">
             <div class="flex justify-end space-x-4">
-                <button type="button"
+                <button type="submit" name="reset_defaults" value="true"
                     class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200">
                     Reset to Default
                 </button>

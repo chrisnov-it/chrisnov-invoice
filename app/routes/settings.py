@@ -290,23 +290,50 @@ Invoice Manager
 def pdf_templates():
     """Manage PDF template settings"""
     if request.method == 'POST':
-        # Update PDF template settings
-        pdf_template = request.form.get('pdf_template', 'professional')
-        header_color = request.form.get('header_color', 'blue')
-        accent_color = request.form.get('accent_color', 'blue')
-        logo_position = request.form.get('logo_position', 'left')
-        footer_text = request.form.get('footer_text', '').strip()
-        show_logo = request.form.get('show_logo') == 'on'
+        if 'reset_defaults' in request.form:
+            settings_to_update = {
+                'PDF_TEMPLATE': 'professional',
+                'PDF_HEADER_COLOR': 'blue',
+                'PDF_ACCENT_COLOR': 'blue',
+                'PDF_LOGO_POSITION': 'left',
+                'PDF_FOOTER_TEXT': 'Thank you for your business!',
+                'PDF_SHOW_LOGO': 'True'
+            }
+        else:
+            allowed_templates = {'professional', 'modern', 'minimal', 'elegant'}
+            allowed_header_colors = {'blue', 'green', 'purple', 'gray'}
+            allowed_accent_colors = {'blue', 'green', 'orange', 'red'}
+            allowed_logo_positions = {'left', 'center', 'right'}
 
-        # Create a dictionary of settings to update
-        settings_to_update = {
-            'PDF_TEMPLATE': pdf_template,
-            'PDF_HEADER_COLOR': header_color,
-            'PDF_ACCENT_COLOR': accent_color,
-            'PDF_LOGO_POSITION': logo_position,
-            'PDF_FOOTER_TEXT': footer_text or 'Thank you for your business!',
-            'PDF_SHOW_LOGO': str(show_logo)
-        }
+            pdf_template = request.form.get('pdf_template', 'professional')
+            header_color = request.form.get('header_color', 'blue')
+            accent_color = request.form.get('accent_color', 'blue')
+            logo_position = request.form.get('logo_position', 'left')
+            footer_text = request.form.get('footer_text', '').strip()
+            show_logo = request.form.get('show_logo') == 'on'
+
+            if pdf_template not in allowed_templates:
+                flash('Invalid PDF template selected.', 'error')
+                return redirect(url_for('settings.pdf_templates'))
+            if header_color not in allowed_header_colors:
+                flash('Invalid header color selected.', 'error')
+                return redirect(url_for('settings.pdf_templates'))
+            if accent_color not in allowed_accent_colors:
+                flash('Invalid accent color selected.', 'error')
+                return redirect(url_for('settings.pdf_templates'))
+            if logo_position not in allowed_logo_positions:
+                flash('Invalid logo position selected.', 'error')
+                return redirect(url_for('settings.pdf_templates'))
+
+            # Create a dictionary of settings to update
+            settings_to_update = {
+                'PDF_TEMPLATE': pdf_template,
+                'PDF_HEADER_COLOR': header_color,
+                'PDF_ACCENT_COLOR': accent_color,
+                'PDF_LOGO_POSITION': logo_position,
+                'PDF_FOOTER_TEXT': footer_text or 'Thank you for your business!',
+                'PDF_SHOW_LOGO': str(show_logo)
+            }
 
         # Update database and config
         for key, value in settings_to_update.items():
