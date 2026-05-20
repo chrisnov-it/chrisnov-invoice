@@ -104,6 +104,23 @@ def generate_recurring_invoices():
     db.session.commit()
     click.echo("Recurring invoice generation complete.")
 
+@app.cli.command("mark-overdue")
+@click.option('--user-id', type=int, default=None, help='Limit overdue status updates to one user.')
+def mark_overdue_invoices(user_id=None):
+    """Mark due invoices as overdue without doing it during dashboard page loads."""
+    today = datetime.utcnow().date()
+    query = Invoice.query.filter(
+        Invoice.due_date < today,
+        Invoice.status.in_(['draft', 'sent', 'unpaid'])
+    )
+
+    if user_id is not None:
+        query = query.filter(Invoice.user_id == user_id)
+
+    updated = query.update({'status': 'overdue'}, synchronize_session=False)
+    db.session.commit()
+    click.echo(f"Marked {updated} invoice(s) as overdue.")
+
 def generate_invoice_number(user_id=None):
     """Generate unique invoice number (copied from invoices.py for CLI use)"""
     today = datetime.now()

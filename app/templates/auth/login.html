@@ -37,8 +37,10 @@
     </button>
 </form>
 
+{% if config['ALLOW_REGISTRATION'] %}
 <p class="mt-6 text-center text-sm text-gray-600">
     New here?
     <a href="{{ url_for('auth.register') }}" class="font-semibold text-primary hover:text-emerald-700">Create an account</a>
 </p>
+{% endif %}
 {% endblock %}

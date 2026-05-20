@@ -3,7 +3,7 @@ import os
 from flask_session import Session
 from config import Config
 from app.models import Setting, Currency, User
-from app.extensions import db, mail, migrate, csrf, login_manager
+from app.extensions import db, mail, migrate, csrf, login_manager, limiter
 from flask_babel import Babel, gettext, ngettext, lazy_gettext, _
 from flask import request, session, g
 from flask_wtf.csrf import CSRFError
@@ -85,6 +85,7 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     csrf.init_app(app)
     login_manager.init_app(app)
+    limiter.init_app(app)
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
 
@@ -192,10 +193,26 @@ def create_app(config_class=Config):
     # Make config and locale available in all templates
     @app.context_processor
     def inject_global_vars():
+        def pagination_url(page):
+            args = request.args.to_dict(flat=True)
+            args['page'] = page
+            return url_for(request.endpoint, **(request.view_args or {}), **args)
+
+        def logo_static_path():
+            filename = app.config.get('LOGO_FILENAME')
+            if not filename:
+                return None
+            if '/' in filename or '\\' in filename:
+                return filename.replace('\\', '/')
+            return 'images/logo.png'
+
         return dict(
             config=app.config,
             current_locale=get_locale(),
-            current_user=current_user
+            current_user=current_user,
+            can_manage_database=current_user.is_authenticated and current_user.id == app.config.get('DATABASE_ADMIN_USER_ID', 1),
+            pagination_url=pagination_url,
+            logo_static_path=logo_static_path
         )
     
     # Register blueprints

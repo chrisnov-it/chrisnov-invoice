@@ -2,7 +2,7 @@ from flask import Blueprint, render_template
 from app.models import Invoice, Client
 from app import db
 from datetime import datetime, timedelta
-from sqlalchemy import func, extract, and_
+from sqlalchemy import func
 from flask_login import current_user
 
 bp = Blueprint('dashboard', __name__)
@@ -59,19 +59,6 @@ def index():
     
     # Get recent invoices
     recent_invoices = Invoice.query.filter_by(user_id=current_user.id).order_by(Invoice.created_at.desc()).limit(5).all()
-    
-    # Check for overdue invoices
-    overdue_invoices = Invoice.query.filter(
-        Invoice.user_id == current_user.id,
-        Invoice.due_date < today,
-        Invoice.status.in_(['draft', 'sent', 'unpaid'])
-    ).all()
-    
-    # Update overdue status
-    for invoice in overdue_invoices:
-        if invoice.status != 'overdue':
-            invoice.status = 'overdue'
-    db.session.commit()
     
     # Get counts by status
     draft_count = Invoice.query.filter_by(user_id=current_user.id, status='draft').count()

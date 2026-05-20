@@ -12,6 +12,12 @@ Welcome to the future of **Chrisnov Invoice**! We are committed to making this t
 - [x] **Backup & Restore Hardening**: Restrict full database export/restore to the configured database owner and validate SQLite backups before restore.
 - [x] **Production Secret Management**: Require a strong production `SECRET_KEY` and enable stricter session cookie settings.
 - [x] **Dependency Security Patch**: Upgrade vulnerable Flask and python-dotenv versions.
+- [x] **Auth Rate Limiting & Registration Toggle**: Throttle auth attempts and allow public signup to be disabled by environment.
+- [x] **List Pagination**: Paginate invoice, client, and recurring invoice indexes for larger accounts.
+- [x] **Per-user Logo Storage**: Prevent users from overwriting one shared logo file.
+- [x] **Global Currency Guardrails**: Keep default currency per-user while limiting global currency add/delete actions to the database owner.
+- [x] **Overdue Status Job**: Move overdue invoice updates out of dashboard page loads into a CLI command.
+- [x] **PostgreSQL-ready Configuration**: Support `DATABASE_URL` for a future database migration without changing the default SQLite setup.
 - [x] **App Version Display**: Show the current version in the app footer.
 
 ## ✅ Completed (v1.2.0 "Standalone & Secure")
@@ -37,12 +43,8 @@ Welcome to the future of **Chrisnov Invoice**! We are committed to making this t
    - Move toward user-scoped export/restore so hosted deployments never expose another user's records.
 3. **Money Precision Upgrade**
    - Replace floating-point invoice amounts with `Decimal`/`Numeric` or integer minor units to avoid rounding drift.
-4. **Currency Settings Consistency**
-   - Make added currencies available in invoice forms and persist default currency changes reliably.
-5. **Migration Hygiene**
+4. **Migration Hygiene**
    - Add a baseline Alembic revision and ensure existing databases are stamped correctly for future schema upgrades.
-6. **Side-effect Cleanup**
-   - Move overdue invoice status updates out of dashboard page loads and into an explicit command, job, or service.
 
 ---
 

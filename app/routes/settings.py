@@ -16,6 +16,31 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def user_logo_directory():
+    return os.path.join(current_app.static_folder, 'uploads', 'users', str(current_user.id))
+
+def user_logo_filename(original_filename):
+    extension = secure_filename(original_filename).rsplit('.', 1)[1].lower()
+    return f'logo.{extension}'
+
+def user_logo_setting_value(filename):
+    return f'uploads/users/{current_user.id}/{filename}'
+
+def remove_current_user_logo():
+    logo_filename = current_app.config.get('LOGO_FILENAME')
+    if not logo_filename:
+        return False
+
+    if '/' in logo_filename or '\\' in logo_filename:
+        logo_path = os.path.join(current_app.static_folder, *logo_filename.replace('\\', '/').split('/'))
+    else:
+        logo_path = os.path.join(current_app.static_folder, 'images', 'logo.png')
+
+    if os.path.exists(logo_path):
+        os.remove(logo_path)
+        return True
+    return False
+
 def update_setting(key, value):
     """Update a setting in the database."""
     setting_key = f'user:{current_user.id}:{key}'
@@ -47,6 +72,7 @@ def currencies():
     """Manage currency settings"""
     if request.method == 'POST':
         if 'add_currency' in request.form:
+            require_database_admin()
             code = request.form.get('code')
             name = request.form.get('name')
             symbol = request.form.get('symbol')
@@ -64,6 +90,7 @@ def currencies():
                 flash(f'Currency {name} ({code}) added successfully!', 'success')
 
         elif 'delete_currency' in request.form:
+            require_database_admin()
             currency_id = request.form.get('currency_id')
             currency_to_delete = Currency.query.get(currency_id)
             if currency_to_delete:
@@ -89,7 +116,11 @@ def currencies():
         return redirect(url_for('settings.currencies'))
 
     currencies = Currency.query.all()
-    return render_template('settings/currencies.html', currencies=currencies)
+    return render_template(
+        'settings/currencies.html',
+        currencies=currencies,
+        can_manage_currencies=current_user_can_manage_database()
+    )
 
 @bp.route('/email', methods=['GET', 'POST'])
 def email():
@@ -129,9 +160,7 @@ def business():
     """Manage business information settings"""
     if request.method == 'POST':
         if 'remove_logo' in request.form:
-            logo_path = os.path.join('app/static/images', 'logo.png')
-            if os.path.exists(logo_path):
-                os.remove(logo_path)
+            if remove_current_user_logo():
                 current_app.config['LOGO_FILENAME'] = None
                 update_setting('LOGO_FILENAME', '')
                 flash('Logo removed successfully!', 'success')
@@ -143,12 +172,14 @@ def business():
         if 'business_logo' in request.files:
             file = request.files['business_logo']
             if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                # to keep the original filename, I will save it to the config
-                current_app.config['LOGO_FILENAME'] = filename
-                update_setting('LOGO_FILENAME', filename)
-                # and save the file as logo.png
-                file.save(os.path.join('app/static/images', 'logo.png'))
+                remove_current_user_logo()
+                logo_dir = user_logo_directory()
+                os.makedirs(logo_dir, exist_ok=True)
+                filename = user_logo_filename(file.filename)
+                logo_setting = user_logo_setting_value(filename)
+                current_app.config['LOGO_FILENAME'] = logo_setting
+                update_setting('LOGO_FILENAME', logo_setting)
+                file.save(os.path.join(logo_dir, filename))
 
         # Update business information
         business_name = request.form.get('business_name', '').strip()

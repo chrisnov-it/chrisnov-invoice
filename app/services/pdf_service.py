@@ -33,14 +33,16 @@ def format_currency(amount, currency_code, config):
 
 def add_logo_if_exists(elements, config, max_width=1.5*inch, max_height=0.8*inch, alignment=TA_LEFT):
     """Add logo to PDF if it exists"""
-    # Use the configured filename if available, otherwise default to logo.png
-    # But since we save as logo.png ALWAYS, checking logo.png is essentially correct for existence,
-    # IF the feature is used. But business.html uses config['LOGO_FILENAME'].
-    # To be consistent with the app flow, we should check if LOGO_FILENAME is set in config first.
-    # However, file.save always writes to logo.png. 
-    logo_path = os.path.join('app', 'static', 'images', 'logo.png')
+    logo_filename = config.get('LOGO_FILENAME')
+    if not logo_filename:
+        return
+
+    if '/' in logo_filename or '\\' in logo_filename:
+        logo_path = os.path.join('app', 'static', *logo_filename.replace('\\', '/').split('/'))
+    else:
+        logo_path = os.path.join('app', 'static', 'images', 'logo.png')
     
-    if os.path.exists(logo_path) and config.get('LOGO_FILENAME'):
+    if os.path.exists(logo_path):
         try:
             logo = Image(logo_path)
             
@@ -661,6 +663,5 @@ def generate_elegant_pdf(invoice, config, buffer):
     doc.build(elements)
     buffer.seek(0)
     return buffer
-
 
 

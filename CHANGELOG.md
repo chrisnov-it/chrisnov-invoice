@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file.
 - **Production Secret Management**: Require a strong `SECRET_KEY` when `APP_ENV=production` and enable stricter production session cookie settings.
 - **Dependency Security**: Upgrade Flask and python-dotenv to versions with current CVE fixes.
 - **Upload Hardening**: Add a configurable request size limit for file uploads.
+- **Auth Hardening**: Add login/register rate limiting and a configurable registration toggle.
+- **Multi-user Hardening**: Store uploaded logos per user and restrict global currency add/delete actions to the configured database owner.
+- **Scalability Hardening**: Add pagination to invoice, client, and recurring invoice lists.
+- **Operational Hardening**: Move overdue invoice status updates to a CLI command and allow `DATABASE_URL` for future PostgreSQL deployments.
 
 ## [1.3.0] - 2026-05-20
 

@@ -67,9 +67,9 @@
                 <h2 class="text-xl font-semibold text-gray-900 mb-6">Business Logo</h2>
                 <div class="flex items-center space-x-6">
                     <div class="shrink-0">
-                        {% if config['LOGO_FILENAME'] %}
+                        {% if logo_static_path() %}
                         <img class="h-16 w-16 object-cover rounded-full"
-                            src="{{ url_for('static', filename='images/logo.png') }}?v={{ range(1, 1000) | random }}"
+                            src="{{ url_for('static', filename=logo_static_path()) }}?v={{ range(1, 1000) | random }}"
                             alt="Current logo">
                         {% else %}
                         <div class="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center">

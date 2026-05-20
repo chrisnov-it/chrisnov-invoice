@@ -8,8 +8,19 @@ bp = Blueprint('recurring_invoices', __name__, url_prefix='/recurring')
 
 @bp.route('/')
 def index():
-    recurring_invoices = RecurringInvoice.query.filter_by(user_id=current_user.id).order_by(RecurringInvoice.next_due_date.asc()).all()
-    return render_template('recurring/index.html', recurring_invoices=recurring_invoices)
+    page = max(request.args.get('page', 1, type=int), 1)
+    pagination = RecurringInvoice.query.filter_by(user_id=current_user.id).order_by(
+        RecurringInvoice.next_due_date.asc()
+    ).paginate(
+        page=page,
+        per_page=current_app.config['ITEMS_PER_PAGE'],
+        error_out=False
+    )
+    return render_template(
+        'recurring/index.html',
+        recurring_invoices=pagination.items,
+        pagination=pagination
+    )
 
 @bp.route('/new', methods=['GET', 'POST'])
 def new():

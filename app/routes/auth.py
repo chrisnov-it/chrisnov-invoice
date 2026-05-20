@@ -1,9 +1,10 @@
 from urllib.parse import urlparse
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from app.extensions import db
+from app.extensions import limiter
 from app.models import Client, Invoice, RecurringInvoice, User
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -17,9 +18,13 @@ def is_safe_next_url(target):
 
 
 @bp.route('/register', methods=['GET', 'POST'])
+@limiter.limit(lambda: current_app.config.get('RATELIMIT_AUTH', '5 per minute'), methods=['POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard.index'))
+    if not current_app.config.get('ALLOW_REGISTRATION', True):
+        flash('Registration is currently closed.', 'info')
+        return redirect(url_for('auth.login'))
 
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
@@ -64,6 +69,7 @@ def register():
 
 
 @bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit(lambda: current_app.config.get('RATELIMIT_AUTH', '5 per minute'), methods=['POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard.index'))

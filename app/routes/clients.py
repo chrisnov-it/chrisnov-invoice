@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, current_app, render_template, request, redirect, url_for, flash, jsonify
 from app.models import Client
 from app import db
 from flask_login import current_user
@@ -8,19 +8,24 @@ bp = Blueprint('clients', __name__, url_prefix='/clients')
 @bp.route('/')
 def index():
     search = request.args.get('search', '')
+    page = max(request.args.get('page', 1, type=int), 1)
     query = Client.query.filter_by(user_id=current_user.id)
     if search:
-        clients = query.filter(
+        query = query.filter(
             db.or_(
                 Client.name.ilike(f'%{search}%'),
                 Client.email.ilike(f'%{search}%'),
                 Client.company.ilike(f'%{search}%')
             )
-        ).order_by(Client.name).all()
-    else:
-        clients = query.order_by(Client.name).all()
+        )
+
+    pagination = query.order_by(Client.name).paginate(
+        page=page,
+        per_page=current_app.config['ITEMS_PER_PAGE'],
+        error_out=False
+    )
     
-    return render_template('clients/index.html', clients=clients, search=search)
+    return render_template('clients/index.html', clients=pagination.items, pagination=pagination, search=search)
 
 @bp.route('/new', methods=['GET', 'POST'])
 def new():

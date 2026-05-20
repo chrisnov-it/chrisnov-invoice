@@ -31,6 +31,7 @@ def generate_invoice_number():
 def index():
     status_filter = request.args.get('status', 'all')
     search = request.args.get('search', '')
+    page = max(request.args.get('page', 1, type=int), 1)
     
     query = Invoice.query.filter_by(user_id=current_user.id)
     
@@ -46,10 +47,15 @@ def index():
             )
         )
     
-    invoices = query.order_by(Invoice.created_at.desc()).all()
+    pagination = query.order_by(Invoice.created_at.desc()).paginate(
+        page=page,
+        per_page=current_app.config['ITEMS_PER_PAGE'],
+        error_out=False
+    )
     
     return render_template('invoices/index.html', 
-                         invoices=invoices, 
+                         invoices=pagination.items,
+                         pagination=pagination,
                          status_filter=status_filter,
                          search=search)
 

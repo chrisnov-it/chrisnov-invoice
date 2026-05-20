@@ -1,19 +1,32 @@
 import os
 
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
+    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+
 class Config:
     """Base configuration"""
     APP_VERSION = "1.3.0"
     APP_ENV = os.environ.get('APP_ENV') or os.environ.get('FLASK_ENV', 'development')
     DEV_SECRET_KEY = 'dev-secret-key-change-in-production'
     SECRET_KEY = os.environ.get('SECRET_KEY') or DEV_SECRET_KEY
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///chrisnov_invoice.db'
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL or 'sqlite:///chrisnov_invoice.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DATABASE_ADMIN_USER_ID = int(os.environ.get('DATABASE_ADMIN_USER_ID', '1'))
+    ALLOW_REGISTRATION = os.environ.get('ALLOW_REGISTRATION', 'true').lower() in ('1', 'true', 'yes', 'on')
 
     # File Uploads
     UPLOAD_FOLDER = 'app/static/images'
     LOGO_FILENAME = None
     MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 16 * 1024 * 1024))
+
+    # Rate limiting
+    RATELIMIT_STORAGE_URI = os.environ.get('RATELIMIT_STORAGE_URI', 'memory://')
+    RATELIMIT_DEFAULT = os.environ.get('RATELIMIT_DEFAULT', '200 per hour')
+    RATELIMIT_AUTH = os.environ.get('RATELIMIT_AUTH', '5 per minute')
+
+    # Pagination
+    ITEMS_PER_PAGE = int(os.environ.get('ITEMS_PER_PAGE', '25'))
     
     # Business Information
     BUSINESS_NAME = "Chrisnov IT Solutions"

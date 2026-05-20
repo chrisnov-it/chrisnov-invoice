@@ -102,6 +102,22 @@ After building, find your app in the `dist/ChrisnovInvoice` folder.
 ## ⚙️ Configuration
 
 All major configuration can be done through the web interface in the **Settings** section.
+For hosted deployments, these environment variables are also supported:
+
+```bash
+APP_ENV=production
+SECRET_KEY=replace-with-a-long-random-secret
+ALLOW_REGISTRATION=true
+DATABASE_ADMIN_USER_ID=1
+DATABASE_URL=sqlite:///chrisnov_invoice.db
+RATELIMIT_AUTH="5 per minute"
+RATELIMIT_DEFAULT="200 per hour"
+ITEMS_PER_PAGE=25
+MAX_CONTENT_LENGTH=16777216
+```
+
+Use `ALLOW_REGISTRATION=false` to close public signup. Keep `DATABASE_URL` unset for the default SQLite database; set it to a PostgreSQL URL only when you are ready to migrate the database.
+Run `flask --app run mark-overdue` from cron/systemd timer if you want overdue invoice status updates to happen automatically.
 
 ### Business Information
 

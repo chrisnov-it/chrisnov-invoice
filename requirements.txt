@@ -8,7 +8,9 @@ python-dateutil==2.8.2
 Flask-Migrate==4.1.0
 Flask-WTF==1.2.1
 Flask-Login==0.6.3
+Flask-Limiter==4.1.1
 flaskwebgui==1.1.8
 pyinstaller==6.17.0
 gunicorn==22.0.0
 python-dotenv==1.2.2
+psycopg2-binary==2.9.12
