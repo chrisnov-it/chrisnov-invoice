@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, abort
 from datetime import datetime
 import os
 from werkzeug.utils import secure_filename
@@ -26,10 +26,21 @@ def update_setting(key, value):
         setting = Setting(key=setting_key, value=value)
         db.session.add(setting)
 
+def current_user_can_manage_database():
+    """Only the configured database owner can export or restore the full DB."""
+    return current_user.id == current_app.config.get('DATABASE_ADMIN_USER_ID', 1)
+
+def require_database_admin():
+    if not current_user_can_manage_database():
+        abort(403)
+
 @bp.route('/')
 def index():
     """Display settings page"""
-    return render_template('settings/index.html')
+    return render_template(
+        'settings/index.html',
+        can_manage_database=current_user_can_manage_database()
+    )
 
 @bp.route('/currencies', methods=['GET', 'POST'])
 def currencies():
@@ -271,11 +282,13 @@ def pdf_templates():
 @bp.route('/backup', methods=['GET'])
 def backup_index():
     """Display backup and restore options"""
+    require_database_admin()
     return render_template('settings/backup.html')
 
 @bp.route('/backup/export', methods=['GET'])
 def export_db():
     """Download current database file"""
+    require_database_admin()
     db_path = BackupService.get_db_path()
     if os.path.exists(db_path):
         timestamp = datetime.now().strftime('%Y-%m-%d_%H%M%S')
@@ -290,6 +303,7 @@ def export_db():
 @bp.route('/backup/import', methods=['POST'])
 def import_db():
     """Restore database from uploaded file"""
+    require_database_admin()
     if 'backup_file' not in request.files:
         flash('No file uploaded.', 'error')
         return redirect(url_for('settings.backup_index'))
@@ -299,9 +313,11 @@ def import_db():
         flash('No file selected.', 'error')
         return redirect(url_for('settings.backup_index'))
     
-    if file and file.filename.endswith('.db'):
+    filename = secure_filename(file.filename)
+    if file and filename.lower().endswith('.db'):
         # Save temp file
-        temp_path = os.path.join(current_app.instance_path, 'temp_restore.db')
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        temp_path = os.path.join(current_app.instance_path, f'temp_restore_{current_user.id}_{timestamp}.db')
         file.save(temp_path)
         
         success, error = BackupService.restore_from_file(temp_path)

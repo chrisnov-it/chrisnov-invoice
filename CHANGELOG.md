@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+- **Backup & Restore Hardening**: Restrict full database export/restore to the configured database owner and validate uploaded SQLite backups before replacing the active database.
+
 ## [1.3.0] - 2026-05-20
 
 ### Added

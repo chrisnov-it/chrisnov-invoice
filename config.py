@@ -6,6 +6,7 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///chrisnov_invoice.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    DATABASE_ADMIN_USER_ID = int(os.environ.get('DATABASE_ADMIN_USER_ID', '1'))
 
     # File Uploads
     UPLOAD_FOLDER = 'app/static/images'

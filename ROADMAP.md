@@ -9,6 +9,7 @@ Welcome to the future of **Chrisnov Invoice**! We are committed to making this t
 - [x] **CSRF Protection**: Protect all mutating forms and language switching requests with CSRF tokens.
 - [x] **Production Deploy Workflow**: Deploy `main` to the VPS through GitHub Actions with backup, dependency install, schema initialization, restart, and health check.
 - [x] **Recurring Invoice XSS Fix**: Safely render recurring invoice items in the edit form.
+- [x] **Backup & Restore Hardening**: Restrict full database export/restore to the configured database owner and validate SQLite backups before restore.
 - [x] **App Version Display**: Show the current version in the app footer.
 
 ## ✅ Completed (v1.2.0 "Standalone & Secure")
@@ -31,19 +32,16 @@ Welcome to the future of **Chrisnov Invoice**! We are committed to making this t
 1. **Authentication Hardening**
    - Add password reset, optional email verification, stronger production session settings, and account management screens.
 2. **Backup & Restore Hardening**
-   - Validate uploaded SQLite backups before restore, check required tables, run integrity checks, and avoid replacing the active database blindly.
    - Move toward user-scoped export/restore so hosted deployments never expose another user's records.
-3. **Recurring Invoice XSS Fix**
-   - Replace unsafe JavaScript interpolation in recurring invoice edit forms with JSON-safe template output.
-4. **Money Precision Upgrade**
+3. **Money Precision Upgrade**
    - Replace floating-point invoice amounts with `Decimal`/`Numeric` or integer minor units to avoid rounding drift.
-5. **Currency Settings Consistency**
+4. **Currency Settings Consistency**
    - Make added currencies available in invoice forms and persist default currency changes reliably.
-6. **Migration Hygiene**
+5. **Migration Hygiene**
    - Add a baseline Alembic revision and ensure existing databases are stamped correctly for future schema upgrades.
-7. **Production Secret Management**
+6. **Production Secret Management**
    - Require a real `SECRET_KEY` in hosted deployments and avoid falling back to the development secret outside local use.
-8. **Side-effect Cleanup**
+7. **Side-effect Cleanup**
    - Move overdue invoice status updates out of dashboard page loads and into an explicit command, job, or service.
 
 ---
