@@ -2,14 +2,20 @@
 
 Welcome to the future of **Chrisnov Invoice**! We are committed to making this the most elegant and efficient invoicing tool for freelancers and small businesses. Below is our vision for upcoming versions.
 
+## ✅ Completed (v1.3.0 "Secure SaaS Foundation")
+
+- [x] **User Accounts**: Register, login, logout, password hashing, and route protection.
+- [x] **Core Per-user Ownership**: Scope clients, invoices, recurring invoices, and user settings to each logged-in account.
+- [x] **CSRF Protection**: Protect all mutating forms and language switching requests with CSRF tokens.
+- [x] **Production Deploy Workflow**: Deploy `main` to the VPS through GitHub Actions with backup, dependency install, schema initialization, restart, and health check.
+- [x] **Recurring Invoice XSS Fix**: Safely render recurring invoice items in the edit form.
+- [x] **App Version Display**: Show the current version in the app footer.
+
 ## ✅ Completed (v1.2.0 "Standalone & Secure")
 
 - [x] **Desktop Mode Support**: Standalone Windows executable (.exe) using `flaskwebgui` and `PyInstaller`.
 - [x] **Database Backup & Restore**: Built-in system to export/import the entire database from the Settings menu.
 - [x] **Refined i18n System**: Official `pybabel` implementation for stable and standardized translations.
-- [x] **CSRF Protection**: Protect all mutating forms and language switching requests with CSRF tokens.
-- [x] **Basic User Authentication**: Register, login, logout, password hashing, and route protection.
-- [x] **Core Per-user Data Ownership**: Scope clients, invoices, recurring invoices, and user settings to the logged-in account.
 
 ## ✅ Completed (v1.1.0 "Elegant & Global")
 

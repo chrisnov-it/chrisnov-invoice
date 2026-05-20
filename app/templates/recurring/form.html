@@ -108,20 +108,52 @@ document.addEventListener('DOMContentLoaded', function() {
         itemIndex++;
         const itemDiv = document.createElement('div');
         itemDiv.classList.add('flex', 'gap-4', 'items-center');
-        itemDiv.innerHTML = `
-            <div class="flex-grow">
-                <input type="text" name="description[]" placeholder="Description" class="w-full px-4 py-2 border border-gray-300 rounded-lg" value="${item ? item.description : ''}" required>
-            </div>
-            <div class="w-24">
-                <input type="number" name="quantity[]" placeholder="Quantity" class="w-full px-4 py-2 border border-gray-300 rounded-lg" value="${item ? item.quantity : 1}" min="0" step="0.01" required>
-            </div>
-            <div class="w-32">
-                <input type="number" name="rate[]" placeholder="Rate" class="w-full px-4 py-2 border border-gray-300 rounded-lg" value="${item ? item.rate : ''}" min="0" step="0.01" required>
-            </div>
-            <div>
-                <button type="button" class="remove-item text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
-            </div>
-        `;
+
+        const descriptionWrapper = document.createElement('div');
+        descriptionWrapper.classList.add('flex-grow');
+        const descriptionInput = document.createElement('input');
+        descriptionInput.type = 'text';
+        descriptionInput.name = 'description[]';
+        descriptionInput.placeholder = 'Description';
+        descriptionInput.required = true;
+        descriptionInput.value = item ? item.description : '';
+        descriptionInput.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg';
+        descriptionWrapper.appendChild(descriptionInput);
+
+        const quantityWrapper = document.createElement('div');
+        quantityWrapper.classList.add('w-24');
+        const quantityInput = document.createElement('input');
+        quantityInput.type = 'number';
+        quantityInput.name = 'quantity[]';
+        quantityInput.placeholder = 'Quantity';
+        quantityInput.min = '0';
+        quantityInput.step = '0.01';
+        quantityInput.required = true;
+        quantityInput.value = item ? item.quantity : 1;
+        quantityInput.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg';
+        quantityWrapper.appendChild(quantityInput);
+
+        const rateWrapper = document.createElement('div');
+        rateWrapper.classList.add('w-32');
+        const rateInput = document.createElement('input');
+        rateInput.type = 'number';
+        rateInput.name = 'rate[]';
+        rateInput.placeholder = 'Rate';
+        rateInput.min = '0';
+        rateInput.step = '0.01';
+        rateInput.required = true;
+        rateInput.value = item ? item.rate : '';
+        rateInput.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg';
+        rateWrapper.appendChild(rateInput);
+
+        const actionWrapper = document.createElement('div');
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'remove-item text-red-500 hover:text-red-700';
+        removeButton.innerHTML = '<i class="fas fa-trash"></i>';
+        actionWrapper.appendChild(removeButton);
+
+        itemDiv.append(descriptionWrapper, quantityWrapper, rateWrapper, actionWrapper);
         itemsContainer.appendChild(itemDiv);
     }
 
@@ -133,14 +165,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Add initial item if creating a new recurring invoice
-    {% if not recurring_invoice %}
-    addItem();
-    {% else %}
-        {% for item in recurring_invoice.items %}
-        addItem({ description: '{{ item.description|safe }}', quantity: '{{ item.quantity }}', rate: '{{ item.rate }}' });
-        {% endfor %}
-    {% endif %}
+    const initialItems = [
+        {% if recurring_invoice %}
+            {% for item in recurring_invoice.items %}
+            {{ {'description': item.description, 'quantity': item.quantity, 'rate': item.rate}|tojson }}{% if not loop.last %},{% endif %}
+            {% endfor %}
+        {% endif %}
+    ];
+
+    if (initialItems.length > 0) {
+        initialItems.forEach(addItem);
+    } else {
+        addItem();
+    }
 });
 </script>
 {% endblock %}

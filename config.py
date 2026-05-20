@@ -2,6 +2,7 @@ import os
 
 class Config:
     """Base configuration"""
+    APP_VERSION = "1.3.0"
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///chrisnov_invoice.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
