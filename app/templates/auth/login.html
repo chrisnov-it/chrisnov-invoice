@@ -1,0 +1,44 @@
+{% extends "auth/base.html" %}
+
+{% block title %}Login - {{ config['BUSINESS_NAME'] }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-xl font-bold text-gray-900">Sign in</h2>
+    <p class="mt-1 text-sm text-gray-600">Access your invoice dashboard.</p>
+</div>
+
+<form method="POST" class="space-y-5">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div>
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+        <input type="email" id="email" name="email" value="{{ email or '' }}" required autofocus
+               class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
+               placeholder="you@example.com">
+    </div>
+
+    <div>
+        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+        <input type="password" id="password" name="password" required
+               class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
+               placeholder="Your password">
+    </div>
+
+    <div class="flex items-center justify-between">
+        <label class="flex items-center text-sm text-gray-700">
+            <input type="checkbox" name="remember" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
+            <span class="ml-2">Remember me</span>
+        </label>
+    </div>
+
+    <button type="submit" class="w-full rounded-lg bg-primary px-4 py-3 font-semibold text-white transition hover:bg-emerald-700">
+        Sign in
+    </button>
+</form>
+
+<p class="mt-6 text-center text-sm text-gray-600">
+    New here?
+    <a href="{{ url_for('auth.register') }}" class="font-semibold text-primary hover:text-emerald-700">Create an account</a>
+</p>
+{% endblock %}

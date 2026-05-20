@@ -1,10 +1,33 @@
 from datetime import datetime
 from app.extensions import db
+from flask_login import UserMixin
+from werkzeug.security import check_password_hash, generate_password_hash
+
+class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(200), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def __repr__(self):
+        return f'<User {self.email}>'
 
 class Client(db.Model):
     __tablename__ = 'clients'
     
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
     name = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(200))
     phone = db.Column(db.String(50))
@@ -36,6 +59,7 @@ class Invoice(db.Model):
     __tablename__ = 'invoices'
 
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
     invoice_number = db.Column(db.String(50), unique=True, nullable=False)
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
     issue_date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
@@ -111,6 +135,7 @@ class RecurringInvoice(db.Model):
     __tablename__ = 'recurring_invoices'
 
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
     frequency = db.Column(db.String(20), nullable=False, default='monthly')  # daily, weekly, monthly, yearly
     interval = db.Column(db.Integer, nullable=False, default=1)

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}{{ config['BUSINESS_NAME'] }} - Invoice Manager{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -222,7 +223,9 @@
                         endblock %}</h2>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <span class="hidden sm:inline text-sm text-gray-600 dark:text-gray-300">{{ _('Welcome back!') }}</span>
+                    {% if current_user.is_authenticated %}
+                    <span class="hidden sm:inline text-sm text-gray-600 dark:text-gray-300">{{ current_user.name }}</span>
+                    {% endif %}
                     <!-- Dark mode toggle -->
                     <button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200"
                         aria-label="Toggle theme">
@@ -237,6 +240,16 @@
                             </option>
                         </select>
                     </div>
+                    {% if current_user.is_authenticated %}
+                    <form method="POST" action="{{ url_for('auth.logout') }}" class="inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit"
+                            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200"
+                            title="Logout" aria-label="Logout">
+                            <i class="fas fa-sign-out-alt text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                    </form>
+                    {% endif %}
                 </div>
             </div>
         </header>
@@ -439,11 +452,20 @@
 
         // Language switching functionality
         function changeLanguage(lang) {
-            // Make AJAX request to set language
-            fetch(`/set_language/${lang}`)
-                .then(response => response.text())
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            fetch(`/set_language/${lang}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Language change failed');
+                    }
+                })
                 .then(() => {
-                    // Reload the page with the new language
                     location.reload();
                 })
                 .catch(error => {

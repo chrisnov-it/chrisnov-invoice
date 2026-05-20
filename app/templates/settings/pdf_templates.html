@@ -5,6 +5,7 @@
 {% block content %}
 <div class="max-w-6xl mx-auto">
     <form method="POST" action="{{ url_for('settings.pdf_templates') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="mb-8">
             <div class="flex items-center justify-between">
                 <div>

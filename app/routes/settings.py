@@ -6,6 +6,7 @@ from app.models import Setting, Currency
 from app import db
 from app.services.backup_service import BackupService
 from flask import send_file
+from flask_login import current_user
 
 bp = Blueprint('settings', __name__, url_prefix='/settings')
 
@@ -17,11 +18,12 @@ def allowed_file(filename):
 
 def update_setting(key, value):
     """Update a setting in the database."""
-    setting = Setting.query.get(key)
+    setting_key = f'user:{current_user.id}:{key}'
+    setting = Setting.query.get(setting_key)
     if setting:
         setting.value = value
     else:
-        setting = Setting(key=key, value=value)
+        setting = Setting(key=setting_key, value=value)
         db.session.add(setting)
 
 @bp.route('/')
@@ -68,6 +70,7 @@ def currencies():
             if Currency.query.filter_by(code=default_currency).first():
                 update_setting('DEFAULT_CURRENCY', default_currency)
                 current_app.config['DEFAULT_CURRENCY'] = default_currency
+                db.session.commit()
                 flash(f'Default currency updated to {default_currency}', 'success')
             else:
                 flash('Invalid currency selected', 'error')
@@ -158,7 +161,7 @@ def business():
             return redirect(url_for('settings.business'))
 
         default_currency = request.form.get('default_currency', 'USD')
-        if default_currency not in current_app.config['SUPPORTED_CURRENCIES']:
+        if not Currency.query.filter_by(code=default_currency).first():
             flash('Invalid currency selected.', 'error')
             return redirect(url_for('settings.business'))
 

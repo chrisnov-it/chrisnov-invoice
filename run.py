@@ -1,17 +1,40 @@
 from app import create_app
-from app.models import RecurringInvoice, Invoice, InvoiceItem, Currency
+from app.models import RecurringInvoice, Invoice, InvoiceItem, Currency, Client, User
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import click
 from app.extensions import db
+from sqlalchemy import inspect, text
 
 app = create_app()
+
+def add_column_if_missing(table_name, column_name, column_sql):
+    """Add a SQLite column for existing local databases created before migrations."""
+    inspector = inspect(db.engine)
+    existing_columns = {column['name'] for column in inspector.get_columns(table_name)}
+    if column_name not in existing_columns:
+        db.session.execute(text(f'ALTER TABLE {table_name} ADD COLUMN {column_sql}'))
+        click.echo(f"Added missing column {table_name}.{column_name}.")
+
+def ensure_ownership_columns():
+    add_column_if_missing('clients', 'user_id', 'user_id INTEGER')
+    add_column_if_missing('invoices', 'user_id', 'user_id INTEGER')
+    add_column_if_missing('recurring_invoices', 'user_id', 'user_id INTEGER')
+
+    if User.query.count() == 1:
+        owner_id = User.query.first().id
+        Client.query.filter_by(user_id=None).update({'user_id': owner_id})
+        Invoice.query.filter_by(user_id=None).update({'user_id': owner_id})
+        RecurringInvoice.query.filter_by(user_id=None).update({'user_id': owner_id})
+        click.echo("Assigned existing ownerless records to the only user account.")
+    db.session.commit()
 
 @app.cli.command("init-db")
 def init_db_command():
     """Create all database tables and seed initial data."""
     db.create_all()
     click.echo("Initialized the database and created all tables.")
+    ensure_ownership_columns()
 
     if Currency.query.count() == 0:
         currencies = [
@@ -27,8 +50,6 @@ def init_db_command():
         click.echo("Currency data already exists.")
 
 
-app = create_app()
-
 @app.cli.command("generate-recurring")
 def generate_recurring_invoices():
     """Generate invoices from recurring invoice schedules."""
@@ -41,7 +62,8 @@ def generate_recurring_invoices():
     for r_invoice in due_recurring_invoices:
         # Create a new standard invoice
         new_invoice = Invoice(
-            invoice_number=generate_invoice_number(),
+            invoice_number=generate_invoice_number(r_invoice.user_id),
+            user_id=r_invoice.user_id,
             client_id=r_invoice.client_id,
             issue_date=today,
             due_date=today + timedelta(days=30), # Or calculate based on payment terms
@@ -82,12 +104,13 @@ def generate_recurring_invoices():
     db.session.commit()
     click.echo("Recurring invoice generation complete.")
 
-def generate_invoice_number():
+def generate_invoice_number(user_id=None):
     """Generate unique invoice number (copied from invoices.py for CLI use)"""
     today = datetime.now()
     prefix = f"INV-{today.strftime('%Y%m')}"
     
     last_invoice = Invoice.query.filter(
+        Invoice.user_id == user_id,
         Invoice.invoice_number.like(f"{prefix}%")
     ).order_by(Invoice.invoice_number.desc()).first()
     

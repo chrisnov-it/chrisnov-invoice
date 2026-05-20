@@ -6,6 +6,8 @@ Flask-Session==0.8.0
 reportlab==4.0.7
 python-dateutil==2.8.2
 Flask-Migrate==4.1.0
+Flask-WTF==1.2.1
+Flask-Login==0.6.3
 flaskwebgui==1.1.8
 pyinstaller==6.17.0
 gunicorn==22.0.0

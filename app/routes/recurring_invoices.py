@@ -2,21 +2,28 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from app.models import RecurringInvoice, RecurringInvoiceItem, Client
 from app import db
 from datetime import datetime, timedelta
+from flask_login import current_user
 
 bp = Blueprint('recurring_invoices', __name__, url_prefix='/recurring')
 
 @bp.route('/')
 def index():
-    recurring_invoices = RecurringInvoice.query.order_by(RecurringInvoice.next_due_date.asc()).all()
+    recurring_invoices = RecurringInvoice.query.filter_by(user_id=current_user.id).order_by(RecurringInvoice.next_due_date.asc()).all()
     return render_template('recurring/index.html', recurring_invoices=recurring_invoices)
 
 @bp.route('/new', methods=['GET', 'POST'])
 def new():
     if request.method == 'POST':
         try:
+            client = Client.query.filter_by(id=request.form['client_id'], user_id=current_user.id).first()
+            if not client:
+                flash('Invalid client selected.', 'error')
+                return redirect(url_for('recurring_invoices.new'))
+
             # Create recurring invoice
             recurring_invoice = RecurringInvoice(
-                client_id=request.form['client_id'],
+                user_id=current_user.id,
+                client_id=client.id,
                 frequency=request.form['frequency'],
                 interval=int(request.form['interval']),
                 start_date=datetime.strptime(request.form['start_date'], '%Y-%m-%d').date(),
@@ -53,23 +60,28 @@ def new():
             db.session.rollback()
             flash(f'Error creating recurring invoice: {str(e)}', 'error')
     
-    clients = Client.query.order_by(Client.name).all()
+    clients = Client.query.filter_by(user_id=current_user.id).order_by(Client.name).all()
     return render_template('recurring/form.html', 
                          recurring_invoice=None, 
                          clients=clients)
 
 @bp.route('/<int:id>')
 def view(id):
-    recurring_invoice = RecurringInvoice.query.get_or_404(id)
+    recurring_invoice = RecurringInvoice.query.filter_by(id=id, user_id=current_user.id).first_or_404()
     return render_template('recurring/view.html', recurring_invoice=recurring_invoice)
 
 @bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 def edit(id):
-    recurring_invoice = RecurringInvoice.query.get_or_404(id)
+    recurring_invoice = RecurringInvoice.query.filter_by(id=id, user_id=current_user.id).first_or_404()
     
     if request.method == 'POST':
         try:
-            recurring_invoice.client_id = request.form['client_id']
+            client = Client.query.filter_by(id=request.form['client_id'], user_id=current_user.id).first()
+            if not client:
+                flash('Invalid client selected.', 'error')
+                return redirect(url_for('recurring_invoices.edit', id=recurring_invoice.id))
+
+            recurring_invoice.client_id = client.id
             recurring_invoice.frequency = request.form['frequency']
             recurring_invoice.interval = int(request.form['interval'])
             recurring_invoice.start_date = datetime.strptime(request.form['start_date'], '%Y-%m-%d').date()
@@ -108,12 +120,12 @@ def edit(id):
             db.session.rollback()
             flash(f'Error updating recurring invoice: {str(e)}', 'error')
     
-    clients = Client.query.order_by(Client.name).all()
+    clients = Client.query.filter_by(user_id=current_user.id).order_by(Client.name).all()
     return render_template('recurring/form.html', recurring_invoice=recurring_invoice, clients=clients)
 
 @bp.route('/<int:id>/delete', methods=['POST'])
 def delete(id):
-    recurring_invoice = RecurringInvoice.query.get_or_404(id)
+    recurring_invoice = RecurringInvoice.query.filter_by(id=id, user_id=current_user.id).first_or_404()
     
     try:
         db.session.delete(recurring_invoice)
@@ -124,4 +136,3 @@ def delete(id):
         flash(f'Error deleting recurring invoice: {str(e)}', 'error')
     
     return redirect(url_for('recurring_invoices.index'))
-

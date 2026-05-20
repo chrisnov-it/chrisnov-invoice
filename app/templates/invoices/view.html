@@ -13,6 +13,7 @@
             </a>
             {% if invoice.client.email %}
             <form method="POST" action="{{ url_for('invoices.email', id=invoice.id) }}" class="inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit"
                     class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
                     <i class="fas fa-envelope mr-2"></i> Email to Client
@@ -33,6 +34,7 @@
             {% if invoice.status == 'draft' %}
             <form method="POST" action="{{ url_for('invoices.update_status', id=invoice.id, status='sent') }}"
                 class="inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit"
                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition text-sm">
                     <i class="fas fa-paper-plane mr-1"></i> Mark as Sent
@@ -43,6 +45,7 @@
             {% if invoice.status in ['draft', 'sent', 'unpaid', 'overdue'] %}
             <form method="POST" action="{{ url_for('invoices.update_status', id=invoice.id, status='paid') }}"
                 class="inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit"
                     class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition text-sm">
                     <i class="fas fa-check mr-1"></i> Mark as Paid
@@ -52,6 +55,7 @@
 
             <form method="POST" action="{{ url_for('invoices.delete', id=invoice.id) }}" class="inline"
                 onsubmit="return confirm('Are you sure you want to delete this invoice?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit"
                     class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition text-sm">
                     <i class="fas fa-trash mr-1"></i> Delete

@@ -5,6 +5,7 @@
 {% block content %}
 <div class="max-w-4xl mx-auto">
     <form method="POST" class="bg-white rounded-xl shadow-md p-8 space-y-8">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <!-- Header -->
         <div class="flex justify-between items-center">
             <div>

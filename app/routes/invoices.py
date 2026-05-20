@@ -4,6 +4,7 @@ from app.services.pdf_service import generate_invoice_pdf
 from app.services.email_service import send_invoice_to_client
 from app import db
 from datetime import datetime, timedelta
+from flask_login import current_user
 
 bp = Blueprint('invoices', __name__, url_prefix='/invoices')
 
@@ -14,6 +15,7 @@ def generate_invoice_number():
     
     # Get last invoice number for this month
     last_invoice = Invoice.query.filter(
+        Invoice.user_id == current_user.id,
         Invoice.invoice_number.like(f"{prefix}%")
     ).order_by(Invoice.invoice_number.desc()).first()
     
@@ -30,13 +32,14 @@ def index():
     status_filter = request.args.get('status', 'all')
     search = request.args.get('search', '')
     
-    query = Invoice.query
+    query = Invoice.query.filter_by(user_id=current_user.id)
     
     if status_filter != 'all':
         query = query.filter_by(status=status_filter)
     
     if search:
         query = query.join(Client).filter(
+            Client.user_id == current_user.id,
             db.or_(
                 Invoice.invoice_number.ilike(f'%{search}%'),
                 Client.name.ilike(f'%{search}%')
@@ -54,10 +57,16 @@ def index():
 def new():
     if request.method == 'POST':
         try:
+            client = Client.query.filter_by(id=request.form['client_id'], user_id=current_user.id).first()
+            if not client:
+                flash('Invalid client selected.', 'error')
+                return redirect(url_for('invoices.new'))
+
             # Create invoice
             invoice = Invoice(
                 invoice_number=request.form['invoice_number'],
-                client_id=request.form['client_id'],
+                user_id=current_user.id,
+                client_id=client.id,
                 issue_date=datetime.strptime(request.form['issue_date'], '%Y-%m-%d').date(),
                 due_date=datetime.strptime(request.form['due_date'], '%Y-%m-%d').date(),
                 currency=request.form.get('currency', current_app.config['DEFAULT_CURRENCY']),
@@ -93,7 +102,7 @@ def new():
             db.session.rollback()
             flash(f'Error creating invoice: {str(e)}', 'error')
     
-    clients = Client.query.order_by(Client.name).all()
+    clients = Client.query.filter_by(user_id=current_user.id).order_by(Client.name).all()
     invoice_number = generate_invoice_number()
     default_due_date = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d')
     
@@ -105,17 +114,22 @@ def new():
 
 @bp.route('/<int:id>')
 def view(id):
-    invoice = Invoice.query.get_or_404(id)
+    invoice = Invoice.query.filter_by(id=id, user_id=current_user.id).first_or_404()
     return render_template('invoices/view.html', invoice=invoice)
 
 @bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 def edit(id):
-    invoice = Invoice.query.get_or_404(id)
+    invoice = Invoice.query.filter_by(id=id, user_id=current_user.id).first_or_404()
     
     if request.method == 'POST':
         try:
+            client = Client.query.filter_by(id=request.form['client_id'], user_id=current_user.id).first()
+            if not client:
+                flash('Invalid client selected.', 'error')
+                return redirect(url_for('invoices.edit', id=invoice.id))
+
             invoice.invoice_number = request.form['invoice_number']
-            invoice.client_id = request.form['client_id']
+            invoice.client_id = client.id
             invoice.issue_date = datetime.strptime(request.form['issue_date'], '%Y-%m-%d').date()
             invoice.due_date = datetime.strptime(request.form['due_date'], '%Y-%m-%d').date()
             invoice.currency = request.form.get('currency', current_app.config['DEFAULT_CURRENCY'])
@@ -152,12 +166,12 @@ def edit(id):
             db.session.rollback()
             flash(f'Error updating invoice: {str(e)}', 'error')
     
-    clients = Client.query.order_by(Client.name).all()
+    clients = Client.query.filter_by(user_id=current_user.id).order_by(Client.name).all()
     return render_template('invoices/form.html', invoice=invoice, clients=clients)
 
 @bp.route('/<int:id>/delete', methods=['POST'])
 def delete(id):
-    invoice = Invoice.query.get_or_404(id)
+    invoice = Invoice.query.filter_by(id=id, user_id=current_user.id).first_or_404()
     
     try:
         db.session.delete(invoice)
@@ -171,7 +185,7 @@ def delete(id):
 
 @bp.route('/<int:id>/status/<status>', methods=['POST'])
 def update_status(id, status):
-    invoice = Invoice.query.get_or_404(id)
+    invoice = Invoice.query.filter_by(id=id, user_id=current_user.id).first_or_404()
     
     valid_statuses = ['draft', 'sent', 'unpaid', 'paid', 'cancelled']
     if status in valid_statuses:
@@ -194,7 +208,7 @@ def update_status(id, status):
 
 @bp.route('/<int:id>/download')
 def download(id):
-    invoice = Invoice.query.get_or_404(id)
+    invoice = Invoice.query.filter_by(id=id, user_id=current_user.id).first_or_404()
 
     try:
         pdf_file = generate_invoice_pdf(invoice, current_app.config)
@@ -210,7 +224,7 @@ def download(id):
 
 @bp.route('/<int:id>/email', methods=['POST'])
 def email(id):
-    invoice = Invoice.query.get_or_404(id)
+    invoice = Invoice.query.filter_by(id=id, user_id=current_user.id).first_or_404()
 
     try:
         success, message = send_invoice_to_client(invoice)

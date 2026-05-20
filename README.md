@@ -13,6 +13,7 @@
 - **PDF Generation**: Create and download beautiful, print-ready PDF invoices.
 - **Email Invoices**: Send invoices directly to your clients from the application.
 - **Dashboard**: Get a quick overview of your business with key financial metrics.
+- **User Accounts**: Register, sign in, and keep core invoice data scoped to the logged-in user.
 
 ### Advanced Features
 
@@ -28,7 +29,9 @@
 ## 🚀 Getting Started
 
 ### 💻 For Regular Users (Windows)
+
 If you don't want to deal with Python and terminal commands, just download the latest standalone version:
+
 1. Go to the [Releases](https://github.com/chrisnov-it/chrisnov-invoice/releases) page.
 2. Download `ChrisnovInvoice-Windows-v1.2.0.zip`.
 3. Extract and run `ChrisnovInvoice.exe`.
@@ -36,6 +39,7 @@ If you don't want to deal with Python and terminal commands, just download the l
 ---
 
 ### 🛠️ For Developers
+
 - Python 3.8+
 - Pip (Python Package Manager)
 
@@ -61,24 +65,38 @@ If you don't want to deal with Python and terminal commands, just download the l
    pip install -r requirements.txt
    ```
 
-4. **Run the application**:
+4. **Initialize the database**:
+
+   ```bash
+   flask --app run init-db
+   ```
+
+   This creates any missing tables, including user accounts for login/register.
+
+5. **Run the application**:
    - **Web Mode** (Standard):
+
      ```bash
      python run.py
      ```
+
    - **Desktop Mode** (Independent window):
+
      ```bash
      python run_desktop.py
      ```
 
 ### 📦 Building for Windows (.exe)
+
 To create a standalone executable for Windows (no Python required for users):
+
 ```bash
 python build_exe.py
 ```
+
 After building, find your app in the `dist/ChrisnovInvoice` folder.
 
-5. **Access the application**:
+6. **Access the application**:
    Open your web browser and navigate to `http://127.0.0.1:5000`.
 
 ## ⚙️ Configuration
@@ -156,6 +174,7 @@ For more detailed information on specific features, please refer to the followin
 - [Currency Settings](docs/CURRENCY_SETTINGS_GUIDE.md): Managing multiple currencies and rounding.
 
 ## ☕ Support the Project
+
 If you find **Chrisnov Invoice** useful and want to support its development (and help me save up for a new PC! 💻), feel free to buy me a coffee! Any donation is greatly appreciated.
 
 [<img src="https://img.shields.io/badge/Donate-PayPal-blue.svg?style=for-the-badge&logo=paypal" alt="Donate with PayPal" />](https://paypal.me/chrisnov-it)
@@ -163,6 +182,7 @@ If you find **Chrisnov Invoice** useful and want to support its development (and
 ---
 
 ## 📜 Changelog
+
 Stay up-to-date with the latest features, improvements, and bug fixes by checking the [CHANGELOG.md](CHANGELOG.md).
 
 ## �️ Roadmap
