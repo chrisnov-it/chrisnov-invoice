@@ -13,6 +13,7 @@ class Config:
     # File Uploads
     UPLOAD_FOLDER = 'app/static/images'
     LOGO_FILENAME = None
+    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 16 * 1024 * 1024))
     
     # Business Information
     BUSINESS_NAME = "Chrisnov IT Solutions"

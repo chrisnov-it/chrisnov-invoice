@@ -11,6 +11,7 @@ Welcome to the future of **Chrisnov Invoice**! We are committed to making this t
 - [x] **Recurring Invoice XSS Fix**: Safely render recurring invoice items in the edit form.
 - [x] **Backup & Restore Hardening**: Restrict full database export/restore to the configured database owner and validate SQLite backups before restore.
 - [x] **Production Secret Management**: Require a strong production `SECRET_KEY` and enable stricter session cookie settings.
+- [x] **Dependency Security Patch**: Upgrade vulnerable Flask and python-dotenv versions.
 - [x] **App Version Display**: Show the current version in the app footer.
 
 ## ✅ Completed (v1.2.0 "Standalone & Secure")

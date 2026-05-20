@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - **Backup & Restore Hardening**: Restrict full database export/restore to the configured database owner and validate uploaded SQLite backups before replacing the active database.
 - **Production Secret Management**: Require a strong `SECRET_KEY` when `APP_ENV=production` and enable stricter production session cookie settings.
+- **Dependency Security**: Upgrade Flask and python-dotenv to versions with current CVE fixes.
+- **Upload Hardening**: Add a configurable request size limit for file uploads.
 
 ## [1.3.0] - 2026-05-20
 
