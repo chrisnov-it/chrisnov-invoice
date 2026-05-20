@@ -3,7 +3,9 @@ import os
 class Config:
     """Base configuration"""
     APP_VERSION = "1.3.0"
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
+    APP_ENV = os.environ.get('APP_ENV') or os.environ.get('FLASK_ENV', 'development')
+    DEV_SECRET_KEY = 'dev-secret-key-change-in-production'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or DEV_SECRET_KEY
     SQLALCHEMY_DATABASE_URI = 'sqlite:///chrisnov_invoice.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DATABASE_ADMIN_USER_ID = int(os.environ.get('DATABASE_ADMIN_USER_ID', '1'))
@@ -35,6 +37,25 @@ class Config:
     SESSION_FILE_DIR = 'sessions'
     SESSION_PERMANENT = True
     SESSION_USE_SIGNER = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE = APP_ENV.lower() == 'production'
+    WTF_CSRF_SSL_STRICT = APP_ENV.lower() == 'production'
+
+    @classmethod
+    def is_production(cls):
+        return cls.APP_ENV.lower() == 'production'
+
+    @classmethod
+    def validate_production_secrets(cls):
+        if not cls.is_production():
+            return
+
+        if not os.environ.get('SECRET_KEY') or cls.SECRET_KEY == cls.DEV_SECRET_KEY:
+            raise RuntimeError('SECRET_KEY must be set to a strong value when APP_ENV=production.')
+
+        if len(cls.SECRET_KEY) < 32:
+            raise RuntimeError('SECRET_KEY must be at least 32 characters when APP_ENV=production.')
 
     # Email Settings (for local email sending)
     MAIL_SERVER = 'localhost'

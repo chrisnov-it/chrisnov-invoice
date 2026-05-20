@@ -73,6 +73,7 @@ def format_currency_filter(amount, currency_code, app):
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    config_class.validate_production_secrets()
     
     # Initialize extensions
     # Initialize session first to ensure it's available for Babel

@@ -10,6 +10,7 @@ Welcome to the future of **Chrisnov Invoice**! We are committed to making this t
 - [x] **Production Deploy Workflow**: Deploy `main` to the VPS through GitHub Actions with backup, dependency install, schema initialization, restart, and health check.
 - [x] **Recurring Invoice XSS Fix**: Safely render recurring invoice items in the edit form.
 - [x] **Backup & Restore Hardening**: Restrict full database export/restore to the configured database owner and validate SQLite backups before restore.
+- [x] **Production Secret Management**: Require a strong production `SECRET_KEY` and enable stricter session cookie settings.
 - [x] **App Version Display**: Show the current version in the app footer.
 
 ## ✅ Completed (v1.2.0 "Standalone & Secure")
@@ -39,9 +40,7 @@ Welcome to the future of **Chrisnov Invoice**! We are committed to making this t
    - Make added currencies available in invoice forms and persist default currency changes reliably.
 5. **Migration Hygiene**
    - Add a baseline Alembic revision and ensure existing databases are stamped correctly for future schema upgrades.
-6. **Production Secret Management**
-   - Require a real `SECRET_KEY` in hosted deployments and avoid falling back to the development secret outside local use.
-7. **Side-effect Cleanup**
+6. **Side-effect Cleanup**
    - Move overdue invoice status updates out of dashboard page loads and into an explicit command, job, or service.
 
 ---
