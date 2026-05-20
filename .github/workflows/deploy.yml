@@ -20,6 +20,7 @@ jobs:
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_SSH_KEY }}
         port: 22
+        command_timeout: 30m
         script: |
           set -e
 
@@ -44,4 +45,16 @@ jobs:
           sudo systemctl restart "$SERVICE_NAME"
           sudo systemctl is-active --quiet "$SERVICE_NAME"
 
-          curl --fail --silent --show-error --head http://127.0.0.1:5001/auth/login >/dev/null
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error --head http://127.0.0.1:5001/auth/login >/dev/null; then
+              echo "Health check passed."
+              exit 0
+            fi
+
+            echo "Waiting for app health check... ($attempt/30)"
+            sleep 2
+          done
+
+          echo "Health check failed."
+          sudo systemctl status "$SERVICE_NAME" --no-pager || true
+          exit 1
