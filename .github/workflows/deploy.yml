@@ -2,7 +2,12 @@ name: Deploy to Production
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -14,26 +19,29 @@ jobs:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_SSH_KEY }}
-        # If you use a password instead of an SSH key, uncomment the line below:
-        # password: ${{ secrets.VPS_PASSWORD }}
         port: 22
         script: |
-          # 1. Navigate to your project directory
-          # TODO: UPDATE THIS PATH to your actual server path (e.g., /var/www/chrisnov-invoice)
-          cd /path/to/your/app 
+          set -e
 
-          # 2. Pull the latest changes
-          git pull origin master
+          APP_DIR="/var/www/chrisnov-invoice"
+          SERVICE_NAME="chrisnov-invoice"
+          BRANCH="main"
 
-          # 3. Activate virtual environment
-          source venv/bin/activate
+          cd "$APP_DIR"
 
-          # 4. Install new dependencies (if any)
-          pip install -r requirements.txt
+          if [ -f instance/chrisnov_invoice.db ]; then
+            mkdir -p instance/backups
+            cp instance/chrisnov_invoice.db "instance/backups/pre_deploy_$(date +%Y%m%d_%H%M%S).db"
+          fi
 
-          # 5. Run database migrations
-          flask db upgrade
+          git fetch origin "$BRANCH"
+          git checkout "$BRANCH"
+          git pull --ff-only origin "$BRANCH"
 
-          # 6. Restart Gunicorn to apply changes
-          # TODO: UPDATE THIS SERVICE NAME (e.g., sudo systemctl restart chrisnov-invoice)
-          sudo systemctl restart chrisnov-invoice
+          ./venv/bin/pip install -r requirements.txt
+          ./venv/bin/flask --app run init-db
+
+          sudo systemctl restart "$SERVICE_NAME"
+          sudo systemctl is-active --quiet "$SERVICE_NAME"
+
+          curl --fail --silent --show-error --head http://127.0.0.1:5001/auth/login >/dev/null
