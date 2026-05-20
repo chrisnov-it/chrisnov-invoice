@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - **Multi-user Hardening**: Store uploaded logos per user and restrict global currency add/delete actions to the configured database owner.
 - **Scalability Hardening**: Add pagination to invoice, client, and recurring invoice lists.
 - **Operational Hardening**: Move overdue invoice status updates to a CLI command and allow `DATABASE_URL` for future PostgreSQL deployments.
+- **Version Display**: Show the app version on auth pages as well as the main app footer.
 
 ## [1.3.0] - 2026-05-20
 
