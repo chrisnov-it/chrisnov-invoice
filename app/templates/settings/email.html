@@ -103,10 +103,9 @@
                                     Password
                                 </label>
                                 <input type="password" id="mail_password" name="mail_password"
-                                       value="{{ config['MAIL_PASSWORD'] or '' }}"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                       placeholder="Your email password or app password">
-                                <p class="mt-2 text-sm text-gray-500">SMTP authentication password (optional for local mail)</p>
+                                       placeholder="Leave blank to keep existing password">
+                                <p class="mt-2 text-sm text-gray-500">SMTP authentication password or app password. Leave blank to keep the saved password.</p>
                             </div>
                         </div>
                     </div>

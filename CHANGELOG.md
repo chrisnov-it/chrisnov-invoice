@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - **Scalability Hardening**: Add pagination to invoice, client, and recurring invoice lists.
 - **Operational Hardening**: Move overdue invoice status updates to a CLI command and allow `DATABASE_URL` for future PostgreSQL deployments.
 - **Version Display**: Show the app version on auth pages as well as the main app footer.
+- **Email Settings Hardening**: Keep saved SMTP passwords out of rendered forms and validate SMTP port values server-side.
 
 ## [1.3.0] - 2026-05-20
 

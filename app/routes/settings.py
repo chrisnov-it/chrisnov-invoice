@@ -44,12 +44,17 @@ def remove_current_user_logo():
 def update_setting(key, value):
     """Update a setting in the database."""
     setting_key = f'user:{current_user.id}:{key}'
-    setting = Setting.query.get(setting_key)
+    setting = db.session.get(Setting, setting_key)
     if setting:
         setting.value = value
     else:
         setting = Setting(key=setting_key, value=value)
         db.session.add(setting)
+
+def get_setting(key, default=None):
+    setting_key = f'user:{current_user.id}:{key}'
+    setting = db.session.get(Setting, setting_key)
+    return setting.value if setting else default
 
 def current_user_can_manage_database():
     """Only the configured database owner can export or restore the full DB."""
@@ -126,14 +131,26 @@ def currencies():
 def email():
     """Manage email settings"""
     if request.method == 'POST':
+        try:
+            mail_port = int(request.form.get('mail_port', '1025'))
+            if not (1 <= mail_port <= 65535):
+                raise ValueError
+        except (TypeError, ValueError):
+            flash('Mail port must be a number between 1 and 65535.', 'error')
+            return redirect(url_for('settings.email'))
+
+        mail_password = request.form.get('mail_password', '')
+        if mail_password == '':
+            mail_password = get_setting('MAIL_PASSWORD', current_app.config.get('MAIL_PASSWORD') or '')
+
         # Update email settings
         settings_to_update = {
             'MAIL_SERVER': request.form.get('mail_server', 'localhost'),
-            'MAIL_PORT': int(request.form.get('mail_port', '1025')),
+            'MAIL_PORT': mail_port,
             'MAIL_USE_TLS': str(request.form.get('mail_use_tls') == 'on'),
             'MAIL_USE_SSL': str(request.form.get('mail_use_ssl') == 'on' and not (request.form.get('mail_use_tls') == 'on')),
             'MAIL_USERNAME': request.form.get('mail_username', ''),
-            'MAIL_PASSWORD': request.form.get('mail_password', ''),
+            'MAIL_PASSWORD': mail_password,
             'MAIL_DEFAULT_SENDER': request.form.get('mail_default_sender', 'noreply@chrisnov-invoice.local')
         }
 
@@ -145,10 +162,6 @@ def email():
                 current_app.config[key] = value
 
         db.session.commit() # Commit changes to the database
-
-        # Reinitialize mail with new settings
-        from app import mail
-        mail.init_app(current_app)
 
         flash('Email settings updated successfully!', 'success')
         return redirect(url_for('settings.email'))
