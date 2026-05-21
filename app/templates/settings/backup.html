@@ -7,8 +7,8 @@
 {% block content %}
 <div class="max-w-4xl mx-auto">
     <div class="mb-6 flex items-center">
-        <a href="{{ url_for('settings.index') }}" class="mr-4 text-gray-500 hover:text-gray-700">
-            <i class="fas fa-arrow-left"></i>
+        <a href="{{ url_for('settings.index') }}" class="mr-4 text-gray-500 hover:text-gray-700" aria-label="{{ _('Back to Settings') }}" title="{{ _('Back to Settings') }}">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
         </a>
         <h1 class="text-2xl font-bold text-gray-800">{{ _('Database Management') }}</h1>
     </div>
@@ -41,7 +41,7 @@
     </div>
 
     <!-- Restore Section -->
-    <div class="bg-white rounded-xl shadow-md overflow-hidden animate-fade-in" style="animation-delay: 0.1s;">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden animate-fade-in animation-delay-100">
         <div class="p-6 border-b border-gray-100 flex items-center">
             <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center mr-4">
                 <i class="fas fa-upload text-xl"></i>
@@ -65,35 +65,35 @@
                 </div>
             </div>
 
-            <form action="{{ url_for('settings.import_db') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <form id="restore-form" action="{{ url_for('settings.import_db') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <p class="block text-sm font-medium text-gray-700 mb-2">
                         {{ _('Select Backup File (.db)') }}
-                    </label>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 transition cursor-pointer" onclick="document.getElementById('backup_file').click()">
-                        <div class="space-y-1 text-center">
-                            <i class="fas fa-database text-gray-400 text-3xl mb-3"></i>
-                            <div class="flex text-sm text-gray-600">
+                    </p>
+                    <label for="backup_file" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 transition cursor-pointer">
+                        <span class="space-y-1 text-center">
+                            <i class="fas fa-database text-gray-400 text-3xl mb-3" aria-hidden="true"></i>
+                            <span class="flex text-sm text-gray-600">
                                 <span class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
                                     {{ _('Upload a file') }}
                                 </span>
-                                <p class="pl-1">{{ _('or drag and drop') }}</p>
-                            </div>
-                            <p class="text-xs text-gray-500">
+                                <span class="pl-1">{{ _('or drag and drop') }}</span>
+                            </span>
+                            <span class="block text-xs text-gray-500">
                                 .db files only
-                            </p>
-                            <p id="file-name-display" class="mt-2 text-sm font-semibold text-blue-600"></p>
-                        </div>
-                        <input id="backup_file" name="backup_file" type="file" class="sr-only" accept=".db" onchange="showFileName(this)">
-                    </div>
+                            </span>
+                            <span id="file-name-display" class="block mt-2 text-sm font-semibold text-blue-600"></span>
+                        </span>
+                        <input id="backup_file" name="backup_file" type="file" class="sr-only" accept=".db">
+                    </label>
                 </div>
 
                 <div class="flex justify-end pt-4">
                     <button type="submit" 
                             class="inline-flex items-center px-6 py-3 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition duration-200"
-                            onclick="return confirm('{{ _('Are you absolutely sure? This will replace all current data.') }}')">
-                        <i class="fas fa-sync-alt mr-2"></i>
+                            data-confirm-message="{{ _('Are you absolutely sure? This will replace all current data.') }}">
+                        <i class="fas fa-sync-alt mr-2" aria-hidden="true"></i>
                         {{ _('Confirm & Restore Data') }}
                     </button>
                 </div>
@@ -103,11 +103,25 @@
 </div>
 
 <script>
-function showFileName(input) {
+document.addEventListener('DOMContentLoaded', function() {
+    const backupFileInput = document.getElementById('backup_file');
     const fileNameDisplay = document.getElementById('file-name-display');
-    if (input.files && input.files[0]) {
-        fileNameDisplay.textContent = input.files[0].name;
+    const restoreForm = document.getElementById('restore-form');
+    const restoreButton = restoreForm ? restoreForm.querySelector('[data-confirm-message]') : null;
+
+    if (backupFileInput && fileNameDisplay) {
+        backupFileInput.addEventListener('change', function() {
+            fileNameDisplay.textContent = backupFileInput.files.length > 0 ? backupFileInput.files[0].name : '';
+        });
     }
-}
+
+    if (restoreForm && restoreButton) {
+        restoreForm.addEventListener('submit', function(event) {
+            if (!confirm(restoreButton.dataset.confirmMessage)) {
+                event.preventDefault();
+            }
+        });
+    }
+});
 </script>
 {% endblock %}

@@ -17,11 +17,11 @@
 
         <!-- Client Selection -->
         <div>
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Client</h2>
-            <select name="client_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+            <label for="client_id" class="block text-xl font-semibold text-gray-900 mb-4">Client</label>
+            <select id="client_id" name="client_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                 <option value="">Select a client</option>
                 {% for client in clients %}
-                <option value="{{ client.id }}" {% if recurring_invoice and recurring_invoice.client_id == client.id %}selected{% endif %}>{{ client.name }}</option>
+                <option value="{{ client.id }}" {% if recurring_invoice and recurring_invoice.client_id == client.id %}selected="selected"{% endif %}>{{ client.name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -33,10 +33,10 @@
                 <div>
                     <label for="frequency" class="block text-sm font-medium text-gray-700 mb-2">Frequency</label>
                     <select id="frequency" name="frequency" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly" selected>Monthly</option>
-                        <option value="yearly">Yearly</option>
+                        <option value="daily" {% if recurring_invoice and recurring_invoice.frequency == 'daily' %}selected="selected"{% endif %}>Daily</option>
+                        <option value="weekly" {% if recurring_invoice and recurring_invoice.frequency == 'weekly' %}selected="selected"{% endif %}>Weekly</option>
+                        <option value="monthly" {% if (recurring_invoice and recurring_invoice.frequency == 'monthly') or not recurring_invoice %}selected="selected"{% endif %}>Monthly</option>
+                        <option value="yearly" {% if recurring_invoice and recurring_invoice.frequency == 'yearly' %}selected="selected"{% endif %}>Yearly</option>
                     </select>
                 </div>
                 <div>
@@ -62,7 +62,7 @@
                     <label for="currency" class="block text-sm font-medium text-gray-700 mb-2">Currency</label>
                     <select id="currency" name="currency" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                         {% for code, currency in config.SUPPORTED_CURRENCIES.items() %}
-                        <option value="{{ code }}" {% if (recurring_invoice and recurring_invoice.currency == code) or (not recurring_invoice and code == config.DEFAULT_CURRENCY) %}selected{% endif %}>{{ currency.name }} ({{ code }})</option>
+                        <option value="{{ code }}" {% if (recurring_invoice and recurring_invoice.currency == code) or (not recurring_invoice and code == config.DEFAULT_CURRENCY) %}selected="selected"{% endif %}>{{ currency.name }} ({{ code }})</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -86,8 +86,8 @@
 
         <!-- Notes -->
         <div>
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Notes</h2>
-            <textarea name="notes" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Enter any notes here...">{{ recurring_invoice.notes if recurring_invoice }}</textarea>
+            <label for="notes" class="block text-xl font-semibold text-gray-900 mb-4">Notes</label>
+            <textarea id="notes" name="notes" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Enter any notes here...">{{ recurring_invoice.notes if recurring_invoice }}</textarea>
         </div>
 
         <!-- Submit -->
@@ -98,14 +98,13 @@
     </form>
 </div>
 
+<script id="initial-items-data" type="application/json">{{ initial_items|tojson }}</script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const itemsContainer = document.getElementById('invoice-items');
     const addItemButton = document.getElementById('add-item');
-    let itemIndex = 0;
 
     function addItem(item) {
-        itemIndex++;
         const itemDiv = document.createElement('div');
         itemDiv.classList.add('flex', 'gap-4', 'items-center');
 
@@ -115,6 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
         descriptionInput.type = 'text';
         descriptionInput.name = 'description[]';
         descriptionInput.placeholder = 'Description';
+        descriptionInput.setAttribute('aria-label', 'Item description');
         descriptionInput.required = true;
         descriptionInput.value = item ? item.description : '';
         descriptionInput.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg';
@@ -126,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
         quantityInput.type = 'number';
         quantityInput.name = 'quantity[]';
         quantityInput.placeholder = 'Quantity';
+        quantityInput.setAttribute('aria-label', 'Item quantity');
         quantityInput.min = '0';
         quantityInput.step = '0.01';
         quantityInput.required = true;
@@ -139,6 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
         rateInput.type = 'number';
         rateInput.name = 'rate[]';
         rateInput.placeholder = 'Rate';
+        rateInput.setAttribute('aria-label', 'Item rate');
         rateInput.min = '0';
         rateInput.step = '0.01';
         rateInput.required = true;
@@ -150,7 +152,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
         removeButton.className = 'remove-item text-red-500 hover:text-red-700';
-        removeButton.innerHTML = '<i class="fas fa-trash"></i>';
+        removeButton.setAttribute('aria-label', 'Remove item');
+        const removeIcon = document.createElement('i');
+        removeIcon.classList.add('fas', 'fa-trash');
+        removeIcon.setAttribute('aria-hidden', 'true');
+        removeButton.appendChild(removeIcon);
         actionWrapper.appendChild(removeButton);
 
         itemDiv.append(descriptionWrapper, quantityWrapper, rateWrapper, actionWrapper);
@@ -165,13 +171,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    const initialItems = [
-        {% if recurring_invoice %}
-            {% for item in recurring_invoice.items %}
-            {{ {'description': item.description, 'quantity': item.quantity, 'rate': item.rate}|tojson }}{% if not loop.last %},{% endif %}
-            {% endfor %}
-        {% endif %}
-    ];
+    const initialItemsElement = document.getElementById('initial-items-data');
+    const initialItems = initialItemsElement ? JSON.parse(initialItemsElement.textContent) : [];
 
     if (initialItems.length > 0) {
         initialItems.forEach(addItem);

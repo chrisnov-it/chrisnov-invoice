@@ -74,7 +74,8 @@ def new():
     clients = Client.query.filter_by(user_id=current_user.id).order_by(Client.name).all()
     return render_template('recurring/form.html', 
                          recurring_invoice=None, 
-                         clients=clients)
+                         clients=clients,
+                         initial_items=[])
 
 @bp.route('/<int:id>')
 def view(id):
@@ -132,7 +133,20 @@ def edit(id):
             flash(f'Error updating recurring invoice: {str(e)}', 'error')
     
     clients = Client.query.filter_by(user_id=current_user.id).order_by(Client.name).all()
-    return render_template('recurring/form.html', recurring_invoice=recurring_invoice, clients=clients)
+    initial_items = [
+        {
+            'description': item.description,
+            'quantity': item.quantity,
+            'rate': item.rate
+        }
+        for item in recurring_invoice.items
+    ]
+    return render_template(
+        'recurring/form.html',
+        recurring_invoice=recurring_invoice,
+        clients=clients,
+        initial_items=initial_items
+    )
 
 @bp.route('/<int:id>/delete', methods=['POST'])
 def delete(id):

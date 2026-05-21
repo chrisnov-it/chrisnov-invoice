@@ -84,8 +84,8 @@
             <div class="mt-8">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold text-gray-800">Items</h3>
-                    <button type="button" onclick="addItem()" class="bg-secondary hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition text-sm">
-                        <i class="fas fa-plus mr-1"></i> Add Item
+                    <button type="button" id="add-item-button" class="bg-secondary hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition text-sm">
+                        <i class="fas fa-plus mr-1" aria-hidden="true"></i> Add Item
                     </button>
                 </div>
 
@@ -113,12 +113,12 @@
                                     <td class="px-4 py-2">
                                         <label for="quantity_{{ loop.index0 }}" class="sr-only">Quantity</label>                                        <input type="number" id="quantity_{{ loop.index0 }}" name="quantity[]" value="{{ item.quantity }}" step="0.01" min="0" required
                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary quantity"
-                                               onchange="calculateRow(this)">
+                                               >
                                     </td>
                                     <td class="px-4 py-2">                                        <label for="rate_{{ loop.index0 }}" class="sr-only">Rate</label>
                                         <input type="number" name="rate[]" value="{{ item.rate }}" step="0.01" min="0" required
                                                id="rate_{{ loop.index0 }}" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary rate"
-                                               onchange="calculateRow(this)">
+                                               >
                                     </td>
                                     <td class="px-4 py-2">                                        <label for="amount_{{ loop.index0 }}" class="sr-only">Amount</label>
                                         <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 amount" 
@@ -126,8 +126,8 @@
                                                value="{{ '%.2f'|format(item.amount) }}" readonly>
                                     </td>
                                     <td class="px-4 py-2">
-                                        <button type="button" onclick="removeItem(this)" class="text-red-600 hover:text-red-800" title="Remove Item">
-                                            <i class="fas fa-trash"></i>
+                                        <button type="button" class="remove-item-button text-red-600 hover:text-red-800" title="Remove Item" aria-label="Remove Item">
+                                            <i class="fas fa-trash" aria-hidden="true"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -144,12 +144,12 @@
                                         <label for="quantity_new" class="sr-only">Quantity</label>
                                         <input type="number" name="quantity[]" value="1" step="0.01" min="0" required
                                                id="quantity_new" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary quantity"
-                                               onchange="calculateRow(this)">
+                                               >
                                     </td>
                                     <td class="px-4 py-2">                                        <label for="rate_new" class="sr-only">Rate</label>
                                         <input type="number" name="rate[]" step="0.01" min="0" required
                                                id="rate_new" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary rate"
-                                               onchange="calculateRow(this)">
+                                               >
                                     </td>
                                     <td class="px-4 py-2">                                        <label for="amount_new" class="sr-only">Amount</label>
                                         <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 amount" 
@@ -157,8 +157,8 @@
                                                value="0.00" readonly>
                                     </td>
                                     <td class="px-4 py-2">
-                                        <button type="button" onclick="removeItem(this)" class="text-red-600 hover:text-red-800" title="Remove Item">
-                                            <i class="fas fa-trash"></i>
+                                        <button type="button" class="remove-item-button text-red-600 hover:text-red-800" title="Remove Item" aria-label="Remove Item">
+                                            <i class="fas fa-trash" aria-hidden="true"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -213,44 +213,139 @@
 
 {% block scripts %}
 <script>
-let itemCount = 0; // Counter for unique IDs
+let itemCount = 0;
+
+function createCell() {
+    const cell = document.createElement('td');
+    cell.className = 'px-4 py-2';
+    return cell;
+}
+
+function createLabel(targetId, text) {
+    const label = document.createElement('label');
+    label.htmlFor = targetId;
+    label.className = 'sr-only';
+    label.textContent = text;
+    return label;
+}
+
+function createInput(options) {
+    const input = document.createElement('input');
+    input.type = options.type;
+    input.id = options.id;
+    input.className = options.className;
+
+    if (options.name) {
+        input.name = options.name;
+    }
+
+    if (options.placeholder) {
+        input.placeholder = options.placeholder;
+    }
+
+    if (options.value !== undefined) {
+        input.value = options.value;
+    }
+
+    if (options.step) {
+        input.step = options.step;
+    }
+
+    if (options.min) {
+        input.min = options.min;
+    }
+
+    if (options.required) {
+        input.required = true;
+    }
+
+    if (options.readOnly) {
+        input.readOnly = true;
+    }
+
+    return input;
+}
 
 function addItem() {
     const tbody = document.getElementById('itemsBody');
     const row = document.createElement('tr');
     row.className = 'item-row';
-    row.innerHTML = `
-        <td class="px-4 py-2">
-            <label for="description_new_${itemCount}" class="sr-only">Description</label>
-            <input type="text" name="description[]" required
-                   id="description_new_${itemCount}" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
-                   placeholder="Service description">
-        </td>
-        <td class="px-4 py-2">
-            <label for="quantity_new_${itemCount}" class="sr-only">Quantity</label>
-            <input type="number" name="quantity[]" value="1" step="0.01" min="0" required
-                   id="quantity_new_${itemCount}" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary quantity"
-                   onchange="calculateRow(this)">
-        </td>
-        <td class="px-4 py-2">
-            <label for="rate_new_${itemCount}" class="sr-only">Rate</label>
-            <input type="number" name="rate[]" step="0.01" min="0" required
-                   id="rate_new_${itemCount}" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary rate"
-                   onchange="calculateRow(this)">
-        </td>
-        <td class="px-4 py-2">
-            <label for="amount_new_${itemCount}" class="sr-only">Amount</label>
-            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 amount" 
-                   value="0.00" readonly>
-        </td>
-        <td class="px-4 py-2">
-            <button type="button" onclick="removeItem(this)" class="text-red-600 hover:text-red-800" title="Remove Item">
-                <i class="fas fa-trash"></i>
-            </button>
-        </td>
-    `;
+
+    const descriptionId = `description_new_${itemCount}`;
+    const quantityId = `quantity_new_${itemCount}`;
+    const rateId = `rate_new_${itemCount}`;
+    const amountId = `amount_new_${itemCount}`;
+
+    const descriptionCell = createCell();
+    descriptionCell.append(
+        createLabel(descriptionId, 'Description'),
+        createInput({
+            type: 'text',
+            name: 'description[]',
+            id: descriptionId,
+            className: 'w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary',
+            placeholder: 'Service description',
+            required: true
+        })
+    );
+
+    const quantityCell = createCell();
+    quantityCell.append(
+        createLabel(quantityId, 'Quantity'),
+        createInput({
+            type: 'number',
+            name: 'quantity[]',
+            id: quantityId,
+            className: 'w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary quantity',
+            value: '1',
+            step: '0.01',
+            min: '0',
+            required: true
+        })
+    );
+
+    const rateCell = createCell();
+    rateCell.append(
+        createLabel(rateId, 'Rate'),
+        createInput({
+            type: 'number',
+            name: 'rate[]',
+            id: rateId,
+            className: 'w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary rate',
+            step: '0.01',
+            min: '0',
+            required: true
+        })
+    );
+
+    const amountCell = createCell();
+    amountCell.append(
+        createLabel(amountId, 'Amount'),
+        createInput({
+            type: 'text',
+            id: amountId,
+            className: 'w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 amount',
+            value: '0.00',
+            readOnly: true
+        })
+    );
+
+    const actionCell = createCell();
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.className = 'remove-item-button text-red-600 hover:text-red-800';
+    removeButton.title = 'Remove Item';
+    removeButton.setAttribute('aria-label', 'Remove Item');
+
+    const removeIcon = document.createElement('i');
+    removeIcon.classList.add('fas', 'fa-trash');
+    removeIcon.setAttribute('aria-hidden', 'true');
+    removeButton.appendChild(removeIcon);
+    actionCell.appendChild(removeButton);
+
+    row.append(descriptionCell, quantityCell, rateCell, amountCell, actionCell);
     tbody.appendChild(row);
-    itemCount++; // Increment for unique IDs
+    itemCount++;
 }
 
 function removeItem(btn) {
@@ -362,6 +457,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('tax_rate').addEventListener('change', calculateTotals);
     document.getElementById('currency').addEventListener('change', calculateTotals);
+
+    document.getElementById('add-item-button').addEventListener('click', addItem);
+
+    document.getElementById('itemsBody').addEventListener('change', function(event) {
+        if (event.target.matches('.quantity, .rate')) {
+            calculateRow(event.target);
+        }
+    });
+
+    document.getElementById('itemsBody').addEventListener('click', function(event) {
+        const removeButton = event.target.closest('.remove-item-button');
+        if (removeButton) {
+            removeItem(removeButton);
+        }
+    });
 });
 </script>
 {% endblock %}
