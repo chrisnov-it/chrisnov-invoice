@@ -110,60 +110,65 @@
             </div>
         </div>
 
-        <!-- Current Template Preview -->
+        <!-- Current Template Style Overview -->
         <div class="bg-white rounded-xl shadow-md p-8 mb-8">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-semibold text-gray-900">Template Preview: <span
-                        id="current-template-name">Professional</span></h2>
-                <span
-                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                    <i class="fas fa-eye mr-2"></i> Preview
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">Style Overview: <span
+                            id="current-template-name">Professional</span></h2>
+                    <p class="mt-1 text-sm text-gray-500">This overview shows the visual direction. Use generated preview for the exact PDF layout.</p>
+                </div>
+                <span class="inline-flex items-center self-start px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                    <i class="fas fa-palette mr-2" aria-hidden="true"></i> Style overview
                 </span>
             </div>
 
-            <!-- Template Preview -->
-            <div class="border-2 border-gray-200 rounded-lg p-6 bg-gray-50">
-                <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden min-h-[500px] relative">
+            <!-- Template Style Overview -->
+            <div class="border border-gray-200 rounded-lg p-6 bg-gray-50">
+                <div class="max-w-3xl mx-auto bg-white shadow-sm rounded-md overflow-hidden border border-gray-200">
 
-                    <!-- Professional Preview -->
+                    <!-- Professional Overview -->
                     <div id="preview-professional" class="template-preview-content h-full">
                         <div id="preview-header-professional"
-                            class="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white min-h-[120px] flex items-center">
+                            class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-5 text-white">
                             <div class="flex justify-between items-center w-full">
                                 <div class="flex-1">
-                                    <h3 class="text-2xl font-bold mb-2">{{ config['BUSINESS_NAME'] or 'Your Business
+                                    <h3 class="text-lg font-bold mb-1">{{ config['BUSINESS_NAME'] or 'Your Business
                                         Name' }}</h3>
-                                    <p class="text-blue-100 text-sm leading-relaxed">{{ config['BUSINESS_ADDRESS'] or
+                                    <p class="text-blue-100 text-xs leading-relaxed">{{ config['BUSINESS_ADDRESS'] or
                                         'Your Business Address' }}</p>
                                 </div>
                                 <div class="text-right ml-6">
-                                    <div class="text-3xl font-bold mb-1">INVOICE</div>
-                                    <div class="text-blue-100 text-sm">#INV-2025-001</div>
+                                    <div class="text-2xl font-bold mb-1">INVOICE</div>
+                                    <div class="text-blue-100 text-xs">#INV-PREVIEW</div>
+                                    <div class="mt-2 inline-block bg-white/20 px-2 py-1 rounded text-xs">UNPAID</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="p-6">
-                            <div class="grid grid-cols-2 gap-8 mb-6">
+                        <div class="p-6 space-y-5">
+                            <div class="grid grid-cols-2 gap-8">
                                 <div>
-                                    <h4 class="font-semibold text-gray-900 mb-2">Bill To:</h4>
-                                    <div class="text-gray-700 text-sm">
+                                    <h4 class="font-semibold text-gray-900 mb-2 text-sm">Bill To</h4>
+                                    <div class="text-gray-600 text-xs space-y-1">
                                         <div class="font-medium">Sample Client</div>
                                         <div>123 Client Street</div>
                                         <div>client@example.com</div>
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="space-y-2 text-sm">
+                                    <div class="space-y-1 text-xs text-gray-600">
                                         <div><span class="font-medium">Date:</span> Oct 31, 2025</div>
                                         <div><span class="font-medium">Due:</span> Nov 30, 2025</div>
                                     </div>
                                 </div>
                             </div>
-                            <table class="w-full mb-6">
+                            <table class="w-full">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                             Description</th>
+                                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Qty</th>
+                                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Rate</th>
                                         <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
                                             Amount</th>
                                     </tr>
@@ -171,12 +176,14 @@
                                 <tbody class="divide-y divide-gray-200">
                                     <tr>
                                         <td class="px-4 py-3 text-sm">Web Development</td>
+                                        <td class="px-4 py-3 text-right text-sm">1.00</td>
+                                        <td class="px-4 py-3 text-right text-sm">$500.00</td>
                                         <td class="px-4 py-3 text-right text-sm font-medium">$500.00</td>
                                     </tr>
                                 </tbody>
                             </table>
                             <div class="flex justify-end border-t pt-4">
-                                <div class="w-64 flex justify-between text-lg font-bold">
+                                <div class="w-56 flex justify-between text-base font-bold">
                                     <span>Total:</span>
                                     <span class="text-blue-700">$550.00</span>
                                 </div>
@@ -184,24 +191,24 @@
                         </div>
                     </div>
 
-                    <!-- Modern Preview -->
+                    <!-- Modern Overview -->
                     <div id="preview-modern" class="template-preview-content h-full hidden flex flex-row">
                         <!-- Sidebar -->
-                        <div class="w-1/3 bg-gray-800 text-white p-6 flex flex-col">
+                        <div class="w-1/3 bg-green-50 p-6 flex flex-col border-r border-green-100">
                             <div class="mb-8">
-                                <h3 class="text-2xl font-bold text-green-400 mb-2">INVOICE</h3>
-                                <p class="text-gray-400">#INV-2025-001</p>
+                                <h3 class="text-2xl font-bold text-green-600 mb-2">INVOICE</h3>
+                                <p class="text-gray-500 text-xs">#INV-PREVIEW</p>
                             </div>
                             <div class="mb-8">
                                 <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Bill To</h4>
-                                <div class="text-sm">
-                                    <p class="font-bold text-white">Sample Client</p>
-                                    <p class="text-gray-300">123 Client Street</p>
+                                <div class="text-xs text-gray-600 space-y-1">
+                                    <p class="font-bold text-gray-900">Sample Client</p>
+                                    <p>123 Client Street</p>
                                 </div>
                             </div>
                             <div>
                                 <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Details</h4>
-                                <div class="text-sm space-y-1">
+                                <div class="text-xs text-gray-600 space-y-1">
                                     <p><span class="text-gray-400">Issued:</span> Oct 31, 2025</p>
                                     <p><span class="text-gray-400">Due:</span> Nov 30, 2025</p>
                                 </div>
@@ -209,31 +216,35 @@
                         </div>
                         <!-- Main Content -->
                         <div class="w-2/3 p-6 bg-white">
-                            <div class="text-right mb-12">
-                                <h3 class="text-xl font-bold text-gray-900">{{ config['BUSINESS_NAME'] or 'Your Business
+                            <div class="text-right mb-10">
+                                <h3 class="text-lg font-bold text-gray-900">{{ config['BUSINESS_NAME'] or 'Your Business
                                     Name' }}</h3>
-                                <p class="text-gray-500 text-sm">{{ config['BUSINESS_ADDRESS'] or 'Your Business
+                                <p class="text-gray-500 text-xs">{{ config['BUSINESS_ADDRESS'] or 'Your Business
                                     Address' }}</p>
                             </div>
                             <h4 class="font-bold text-gray-900 mb-4 border-b pb-2">ITEMS & SERVICES</h4>
-                            <table class="w-full mb-8">
+                            <table class="w-full mb-6">
                                 <thead>
                                     <tr class="text-gray-500 text-xs text-left">
                                         <th class="py-2">DESCRIPTION</th>
+                                        <th class="py-2 text-right">QTY</th>
+                                        <th class="py-2 text-right">RATE</th>
                                         <th class="py-2 text-right">AMOUNT</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr class="border-b">
                                         <td class="py-3 text-sm font-bold text-gray-800">Web Development</td>
+                                        <td class="py-3 text-right text-sm text-gray-600">1.00</td>
+                                        <td class="py-3 text-right text-sm text-gray-600">$500.00</td>
                                         <td class="py-3 text-right text-sm text-gray-600">$500.00</td>
                                     </tr>
                                 </tbody>
                             </table>
                             <div class="flex justify-end">
-                                <div class="w-48">
+                                <div class="w-56">
                                     <div
-                                        class="flex justify-between text-xl font-bold text-gray-900 border-t-2 border-gray-100 pt-4">
+                                        class="flex justify-between text-lg font-bold text-gray-900 border-t-2 border-gray-100 pt-4">
                                         <span>TOTAL</span>
                                         <span class="text-green-600">$550.00</span>
                                     </div>
@@ -242,13 +253,13 @@
                         </div>
                     </div>
 
-                    <!-- Minimal Preview -->
+                    <!-- Minimal Overview -->
                     <div id="preview-minimal" class="template-preview-content h-full hidden p-8 bg-white">
-                        <div class="flex justify-between items-start mb-12 border-b pb-8">
+                        <div class="flex justify-between items-start mb-10 border-b pb-6">
                             <div>
-                                <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ config['BUSINESS_NAME'] or 'Your
+                                <h3 class="text-xl font-bold text-gray-900 mb-1">{{ config['BUSINESS_NAME'] or 'Your
                                     Business Name' }}</h3>
-                                <p class="text-gray-500 text-sm">{{ config['BUSINESS_ADDRESS'] or 'Your Business
+                                <p class="text-gray-500 text-xs">{{ config['BUSINESS_ADDRESS'] or 'Your Business
                                     Address' }}</p>
                             </div>
                             <div class="text-right">
@@ -256,7 +267,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-8 mb-12">
+                        <div class="grid grid-cols-3 gap-8 mb-10">
                             <div>
                                 <h4 class="text-xs font-bold text-gray-400 uppercase mb-2">Billed To</h4>
                                 <p class="text-sm font-bold text-gray-900">Sample Client</p>
@@ -276,12 +287,16 @@
                             <thead>
                                 <tr class="border-b-2 border-black">
                                     <th class="text-left py-2 text-xs font-bold tracking-wider">DESCRIPTION</th>
+                                    <th class="text-right py-2 text-xs font-bold tracking-wider">QTY</th>
+                                    <th class="text-right py-2 text-xs font-bold tracking-wider">RATE</th>
                                     <th class="text-right py-2 text-xs font-bold tracking-wider">AMOUNT</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr class="border-b border-gray-100">
                                     <td class="py-4 text-sm">Web Development Service</td>
+                                    <td class="py-4 text-right text-sm">1.00</td>
+                                    <td class="py-4 text-right text-sm">$500.00</td>
                                     <td class="py-4 text-right text-sm font-bold">$500.00</td>
                                 </tr>
                             </tbody>
@@ -295,23 +310,23 @@
                         </div>
                     </div>
 
-                    <!-- Elegant Preview -->
+                    <!-- Elegant Overview -->
                     <div id="preview-elegant"
                         class="template-preview-content h-full hidden p-8 bg-white text-center font-serif">
-                        <div class="mb-8">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-2 uppercase tracking-widest">{{
+                        <div class="mb-7">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2 uppercase tracking-widest">{{
                                 config['BUSINESS_NAME'] or 'Your Business Name' }}</h3>
                             <p class="text-gray-500 text-xs uppercase tracking-wider">{{ config['BUSINESS_ADDRESS'] or
                                 'Your Business Address' }}</p>
                         </div>
 
-                        <div class="mb-10">
+                        <div class="mb-8">
                             <h2
                                 class="text-xl font-bold border-y border-black py-2 inline-block px-12 uppercase tracking-widest">
                                 Invoice</h2>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-4 mb-10 text-left text-sm max-w-2xl mx-auto">
+                        <div class="grid grid-cols-3 gap-4 mb-8 text-left text-sm max-w-2xl mx-auto">
                             <div>
                                 <h4 class="font-bold border-b border-gray-300 pb-1 mb-2 uppercase text-xs">Billed To
                                 </h4>
@@ -330,12 +345,16 @@
                             <thead>
                                 <tr class="border-b border-black">
                                     <th class="py-2 text-left font-bold uppercase text-xs">Description</th>
+                                    <th class="py-2 text-right font-bold uppercase text-xs">Qty</th>
+                                    <th class="py-2 text-right font-bold uppercase text-xs">Rate</th>
                                     <th class="py-2 text-right font-bold uppercase text-xs">Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr class="border-b border-gray-200">
                                     <td class="py-3 text-left">Web Development Service</td>
+                                    <td class="py-3 text-right">1.00</td>
+                                    <td class="py-3 text-right">$500.00</td>
                                     <td class="py-3 text-right">$500.00</td>
                                 </tr>
                             </tbody>
@@ -349,9 +368,7 @@
                         </div>
                     </div>
 
-                    <!-- Footer (Shared/Dynamic) -->
-                    <div
-                        class="absolute bottom-0 w-full bg-gray-50 px-6 py-3 text-center text-gray-500 text-xs border-t">
+                    <div class="bg-gray-50 px-6 py-3 text-center text-gray-500 text-xs border-t">
                         {{ config.get('PDF_FOOTER_TEXT', 'Thank you for your business!') }}
                     </div>
                 </div>
