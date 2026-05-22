@@ -33,6 +33,16 @@ USER_SETTING_KEYS = [
     'PDF_SHOW_LOGO',
 ]
 
+USER_PRIVATE_SETTING_DEFAULTS = {
+    'MAIL_SERVER': '',
+    'MAIL_PORT': '',
+    'MAIL_USE_TLS': False,
+    'MAIL_USE_SSL': False,
+    'MAIL_USERNAME': '',
+    'MAIL_PASSWORD': '',
+    'MAIL_DEFAULT_SENDER': '',
+}
+
 def format_currency_filter(amount, currency_code, app):
     """Jinja2 filter to format currency with thousand separators"""
     with app.app_context():
@@ -142,6 +152,7 @@ def create_app(config_class=Config):
     def load_request_settings():
         load_global_settings()
         if current_user.is_authenticated:
+            app.config.update(USER_PRIVATE_SETTING_DEFAULTS)
             prefix = f'user:{current_user.id}:'
             for setting in Setting.query.filter(Setting.key.startswith(prefix)).all():
                 app.config[setting.key.removeprefix(prefix)] = coerce_setting_value(setting.value)

@@ -3,8 +3,31 @@ from flask_mail import Mail, Message
 from app.services.pdf_service import generate_invoice_pdf
 import os
 
+def get_mail_connection_label():
+    server = current_app.config.get('MAIL_SERVER') or '(not configured)'
+    port = current_app.config.get('MAIL_PORT') or '(no port)'
+    encryption = 'SSL' if current_app.config.get('MAIL_USE_SSL') else 'TLS' if current_app.config.get('MAIL_USE_TLS') else 'plain'
+    return f'{server}:{port} ({encryption})'
+
+def validate_mail_settings():
+    missing = []
+    if not current_app.config.get('MAIL_SERVER'):
+        missing.append('mail server')
+    if not current_app.config.get('MAIL_PORT'):
+        missing.append('port')
+    if not current_app.config.get('MAIL_DEFAULT_SENDER'):
+        missing.append('from email')
+
+    if missing:
+        return False, f"Please configure {', '.join(missing)} before sending email."
+    return True, None
+
 def send_mail_message(message):
     """Send email using the current request's resolved mail configuration."""
+    valid, error = validate_mail_settings()
+    if not valid:
+        raise RuntimeError(error)
+
     configured_mail = Mail(current_app._get_current_object())
     configured_mail.send(message)
 

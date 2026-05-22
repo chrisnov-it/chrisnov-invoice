@@ -56,6 +56,17 @@ def get_setting(key, default=None):
     setting = db.session.get(Setting, setting_key)
     return setting.value if setting else default
 
+def get_email_settings():
+    return {
+        'MAIL_SERVER': get_setting('MAIL_SERVER', ''),
+        'MAIL_PORT': get_setting('MAIL_PORT', ''),
+        'MAIL_USE_TLS': get_setting('MAIL_USE_TLS', 'False').lower() == 'true',
+        'MAIL_USE_SSL': get_setting('MAIL_USE_SSL', 'False').lower() == 'true',
+        'MAIL_USERNAME': get_setting('MAIL_USERNAME', ''),
+        'MAIL_DEFAULT_SENDER': get_setting('MAIL_DEFAULT_SENDER', ''),
+        'MAIL_PASSWORD_SET': bool(get_setting('MAIL_PASSWORD', '')),
+    }
+
 def current_user_can_manage_database():
     """Only the configured database owner can export or restore the full DB."""
     return current_user.id == current_app.config.get('DATABASE_ADMIN_USER_ID', 1)
@@ -141,17 +152,17 @@ def email():
 
         mail_password = request.form.get('mail_password', '')
         if mail_password == '':
-            mail_password = get_setting('MAIL_PASSWORD', current_app.config.get('MAIL_PASSWORD') or '')
+            mail_password = get_setting('MAIL_PASSWORD', '')
 
         # Update email settings
         settings_to_update = {
-            'MAIL_SERVER': request.form.get('mail_server', 'localhost'),
+            'MAIL_SERVER': request.form.get('mail_server', '').strip(),
             'MAIL_PORT': mail_port,
             'MAIL_USE_TLS': str(request.form.get('mail_use_tls') == 'on'),
             'MAIL_USE_SSL': str(request.form.get('mail_use_ssl') == 'on' and not (request.form.get('mail_use_tls') == 'on')),
-            'MAIL_USERNAME': request.form.get('mail_username', ''),
+            'MAIL_USERNAME': request.form.get('mail_username', '').strip(),
             'MAIL_PASSWORD': mail_password,
-            'MAIL_DEFAULT_SENDER': request.form.get('mail_default_sender', 'noreply@chrisnov-invoice.local')
+            'MAIL_DEFAULT_SENDER': request.form.get('mail_default_sender', '').strip()
         }
 
         for key, value in settings_to_update.items():
@@ -166,7 +177,7 @@ def email():
         flash('Email settings updated successfully!', 'success')
         return redirect(url_for('settings.email'))
 
-    return render_template('settings/email.html')
+    return render_template('settings/email.html', email_settings=get_email_settings())
 
 @bp.route('/business', methods=['GET', 'POST'])
 def business():
@@ -282,7 +293,8 @@ Invoice Manager
         flash(f'Test email sent successfully to {test_email}!', 'success')
 
     except Exception as e:
-        flash(f'Failed to send test email: {str(e)}', 'error')
+        from app.services.email_service import get_mail_connection_label
+        flash(f'Failed to send test email via {get_mail_connection_label()}: {str(e)}', 'error')
 
     return redirect(url_for('settings.email'))
 
