@@ -1,8 +1,12 @@
 from flask import current_app
-from flask_mail import Message
+from flask_mail import Mail, Message
 from app.services.pdf_service import generate_invoice_pdf
-from app import mail
 import os
+
+def send_mail_message(message):
+    """Send email using the current request's resolved mail configuration."""
+    configured_mail = Mail(current_app._get_current_object())
+    configured_mail.send(message)
 
 def send_invoice_email(invoice, recipient_email, subject=None, message=None):
     """Send invoice via email with PDF attachment"""
@@ -54,7 +58,7 @@ def send_invoice_email(invoice, recipient_email, subject=None, message=None):
         )
 
         # Send email
-        mail.send(msg)
+        send_mail_message(msg)
 
         return True, "Invoice sent successfully via email"
 

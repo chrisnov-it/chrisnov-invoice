@@ -258,7 +258,7 @@ def test_email():
 
     try:
         from flask_mail import Message
-        from app import mail
+        from app.services.email_service import send_mail_message
 
         msg = Message(
             subject='Test Email from Invoice Manager',
@@ -278,7 +278,7 @@ Invoice Manager
 """
         )
 
-        mail.send(msg)
+        send_mail_message(msg)
         flash(f'Test email sent successfully to {test_email}!', 'success')
 
     except Exception as e:
