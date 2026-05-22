@@ -15,6 +15,7 @@ def index():
             db.or_(
                 Client.name.ilike(f'%{search}%'),
                 Client.email.ilike(f'%{search}%'),
+                Client.website.ilike(f'%{search}%'),
                 Client.company.ilike(f'%{search}%')
             )
         )
@@ -34,6 +35,7 @@ def new():
             name=request.form['name'],
             user_id=current_user.id,
             email=request.form.get('email'),
+            website=request.form.get('website'),
             phone=request.form.get('phone'),
             address=request.form.get('address'),
             company=request.form.get('company')
@@ -62,6 +64,7 @@ def edit(id):
     if request.method == 'POST':
         client.name = request.form['name']
         client.email = request.form.get('email')
+        client.website = request.form.get('website')
         client.phone = request.form.get('phone')
         client.address = request.form.get('address')
         client.company = request.form.get('company')

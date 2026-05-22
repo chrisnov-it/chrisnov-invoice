@@ -106,6 +106,7 @@ def build_sample_invoice():
         company='Acme Studio',
         address='123 Client Street\nJakarta, Indonesia',
         email='client@example.com',
+        website='https://client.example.com',
         phone='+62 812-0000-0000'
     )
     items = [

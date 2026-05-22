@@ -30,6 +30,7 @@ class Client(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
     name = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(200))
+    website = db.Column(db.String(255))
     phone = db.Column(db.String(50))
     address = db.Column(db.Text)
     company = db.Column(db.String(200))
@@ -48,6 +49,7 @@ class Client(db.Model):
             'id': self.id,
             'name': self.name,
             'email': self.email,
+            'website': self.website,
             'phone': self.phone,
             'address': self.address,
             'company': self.company,

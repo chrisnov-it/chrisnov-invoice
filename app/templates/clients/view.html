@@ -54,6 +54,22 @@
                     {% endif %}
                 </p>
             </div>
+
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-1">Website</h3>
+                <p class="text-lg text-gray-900">
+                    {% if client.website %}
+                        {% if client.website.startswith('http://') or client.website.startswith('https://') %}
+                            {% set website_url = client.website %}
+                        {% else %}
+                            {% set website_url = 'https://' ~ client.website %}
+                        {% endif %}
+                        <a href="{{ website_url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800">{{ client.website }}</a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </p>
+            </div>
             
             <div class="md:col-span-2">
                 <h3 class="text-sm font-medium text-gray-500 mb-1">Address</h3>

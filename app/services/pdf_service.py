@@ -23,6 +23,9 @@ def logo_alignment(config, fallback=TA_LEFT):
         return TA_RIGHT
     return fallback
 
+def client_website(client):
+    return getattr(client, 'website', None)
+
 def format_currency(amount, currency_code, config):
     """Format currency amount based on currency settings"""
     if currency_code not in config['SUPPORTED_CURRENCIES']:
@@ -200,6 +203,7 @@ def generate_professional_pdf(invoice, config, buffer):
             Paragraph(pdf_text(invoice.client.company), normal_style),
             Paragraph(pdf_text(invoice.client.address), normal_style),
             Paragraph(pdf_text(invoice.client.email), normal_style),
+            Paragraph(pdf_text(client_website(invoice.client)), normal_style),
             Paragraph(pdf_text(invoice.client.phone), normal_style)
         ],
         [
@@ -340,6 +344,7 @@ def generate_modern_pdf(invoice, config, buffer):
         Paragraph(pdf_text(invoice.client.company), normal_style),
         Paragraph(pdf_text(invoice.client.address), normal_style),
         Paragraph(pdf_text(invoice.client.email), normal_style),
+        Paragraph(pdf_text(client_website(invoice.client)), normal_style),
         Spacer(1, 0.3*inch),
         Paragraph("DETAILS", heading_style),
         Paragraph(f"<b>Issue Date:</b> {invoice.issue_date.strftime('%d %b %Y')}", normal_style),
@@ -473,6 +478,7 @@ def generate_minimal_pdf(invoice, config, buffer):
         [
             Paragraph(f"<b>{pdf_text(invoice.client.name)}</b>", normal_style),
             Paragraph(pdf_text(invoice.client.address), normal_style),
+            Paragraph(pdf_text(client_website(invoice.client)), normal_style),
         ]
     ]]
     info_table = Table(info_data, colWidths=[3.5*inch, 3.5*inch])
@@ -597,6 +603,7 @@ def generate_elegant_pdf(invoice, config, buffer):
         Paragraph(pdf_text(invoice.client.name), normal_style),
         Paragraph(pdf_text(invoice.client.company), normal_style),
         Paragraph(pdf_text(invoice.client.address), normal_style),
+        Paragraph(pdf_text(client_website(invoice.client)), normal_style),
     ]
 
     # Column 2: (Empty spacer)
