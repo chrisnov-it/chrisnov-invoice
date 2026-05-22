@@ -1,12 +1,14 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, abort
 from datetime import datetime
 import os
+from types import SimpleNamespace
 from werkzeug.utils import secure_filename
 from app.models import Setting, Currency
 from app import db
 from app.services.backup_service import BackupService
 from flask import send_file
 from flask_login import current_user
+from app.services.pdf_service import generate_invoice_pdf
 
 bp = Blueprint('settings', __name__, url_prefix='/settings')
 
@@ -66,6 +68,65 @@ def get_email_settings():
         'MAIL_DEFAULT_SENDER': get_setting('MAIL_DEFAULT_SENDER', ''),
         'MAIL_PASSWORD_SET': bool(get_setting('MAIL_PASSWORD', '')),
     }
+
+def build_pdf_settings_from_request():
+    allowed_templates = {'professional', 'modern', 'minimal', 'elegant'}
+    allowed_header_colors = {'blue', 'green', 'purple', 'gray'}
+    allowed_accent_colors = {'blue', 'green', 'orange', 'red'}
+    allowed_logo_positions = {'left', 'center', 'right'}
+
+    pdf_template = request.values.get('pdf_template', current_app.config.get('PDF_TEMPLATE', 'professional'))
+    header_color = request.values.get('header_color', current_app.config.get('PDF_HEADER_COLOR', 'blue'))
+    accent_color = request.values.get('accent_color', current_app.config.get('PDF_ACCENT_COLOR', 'blue'))
+    logo_position = request.values.get('logo_position', current_app.config.get('PDF_LOGO_POSITION', 'left'))
+    footer_text = request.values.get('footer_text', current_app.config.get('PDF_FOOTER_TEXT', 'Thank you for your business!')).strip()
+
+    if pdf_template not in allowed_templates:
+        pdf_template = 'professional'
+    if header_color not in allowed_header_colors:
+        header_color = 'blue'
+    if accent_color not in allowed_accent_colors:
+        accent_color = 'blue'
+    if logo_position not in allowed_logo_positions:
+        logo_position = 'left'
+
+    return {
+        'PDF_TEMPLATE': pdf_template,
+        'PDF_HEADER_COLOR': header_color,
+        'PDF_ACCENT_COLOR': accent_color,
+        'PDF_LOGO_POSITION': logo_position,
+        'PDF_FOOTER_TEXT': footer_text or 'Thank you for your business!',
+        'PDF_SHOW_LOGO': request.values.get('show_logo') == 'on'
+    }
+
+def build_sample_invoice():
+    currency = current_app.config.get('DEFAULT_CURRENCY', 'IDR')
+    client = SimpleNamespace(
+        name='Sample Client',
+        company='Acme Studio',
+        address='123 Client Street\nJakarta, Indonesia',
+        email='client@example.com',
+        phone='+62 812-0000-0000'
+    )
+    items = [
+        SimpleNamespace(description='Web Development Service', quantity=1, rate=5000000, amount=5000000),
+        SimpleNamespace(description='Monthly Maintenance', quantity=2, rate=750000, amount=1500000),
+    ]
+    invoice = SimpleNamespace(
+        invoice_number='INV-PREVIEW-001',
+        client=client,
+        items=items,
+        issue_date=datetime(2026, 5, 22).date(),
+        due_date=datetime(2026, 6, 21).date(),
+        status='draft',
+        currency=currency,
+        subtotal=sum(item.amount for item in items),
+        tax_rate=current_app.config.get('TAX_RATE', 0.11),
+        notes='This is a generated preview using sample invoice data.'
+    )
+    invoice.tax_amount = invoice.subtotal * invoice.tax_rate
+    invoice.total = invoice.subtotal + invoice.tax_amount
+    return invoice
 
 def current_user_can_manage_database():
     """Only the configured database owner can export or restore the full DB."""
@@ -361,6 +422,25 @@ def pdf_templates():
         return redirect(url_for('settings.pdf_templates'))
 
     return render_template('settings/pdf_templates.html')
+
+@bp.route('/pdf-templates/preview', methods=['GET'])
+def pdf_template_preview():
+    """Generate a real PDF preview using the selected template settings."""
+    preview_config = dict(current_app.config)
+    preview_config.update(build_pdf_settings_from_request())
+    preview_invoice = build_sample_invoice()
+
+    try:
+        pdf_file = generate_invoice_pdf(preview_invoice, preview_config)
+        return send_file(
+            pdf_file,
+            as_attachment=False,
+            download_name='pdf-template-preview.pdf',
+            mimetype='application/pdf'
+        )
+    except Exception as e:
+        flash(f'Error generating PDF preview: {str(e)}', 'error')
+        return redirect(url_for('settings.pdf_templates'))
 
 @bp.route('/backup', methods=['GET'])
 def backup_index():

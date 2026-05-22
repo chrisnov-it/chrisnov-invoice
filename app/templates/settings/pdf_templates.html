@@ -512,6 +512,12 @@
                     class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200">
                     Reset to Default
                 </button>
+                <button type="button"
+                    id="preview-pdf-button"
+                    data-preview-url="{{ url_for('settings.pdf_template_preview') }}"
+                    class="px-6 py-3 border border-primary text-primary hover:bg-green-50 font-semibold rounded-lg transition duration-200">
+                    <i class="fas fa-file-pdf mr-2" aria-hidden="true"></i> Preview Generated PDF
+                </button>
                 <button type="submit" data-loading-label="Saving..."
                     class="px-6 py-3 bg-primary hover:bg-blue-900 text-white font-semibold rounded-lg transition duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                     <i class="fas fa-save mr-2"></i> Save Template Settings
@@ -660,6 +666,29 @@
                 }
             });
         });
+
+        const previewButton = document.getElementById('preview-pdf-button');
+        if (previewButton) {
+            previewButton.addEventListener('click', function () {
+                const params = new URLSearchParams();
+                const selectedTemplate = document.querySelector('input[name="pdf_template"]:checked');
+                const selectedHeaderColor = document.querySelector('input[name="header_color"]:checked');
+                const selectedAccentColor = document.querySelector('input[name="accent_color"]:checked');
+                const selectedLogoPosition = document.querySelector('input[name="logo_position"]:checked');
+                const footerText = document.getElementById('footer_text');
+                const showLogo = document.getElementById('show_logo');
+
+                if (selectedTemplate) params.set('pdf_template', selectedTemplate.value);
+                if (selectedHeaderColor) params.set('header_color', selectedHeaderColor.value);
+                if (selectedAccentColor) params.set('accent_color', selectedAccentColor.value);
+                if (selectedLogoPosition) params.set('logo_position', selectedLogoPosition.value);
+                if (footerText) params.set('footer_text', footerText.value);
+                if (showLogo && showLogo.checked) params.set('show_logo', 'on');
+
+                const previewUrl = `${previewButton.dataset.previewUrl}?${params.toString()}`;
+                window.open(previewUrl, '_blank', 'noopener');
+            });
+        }
 
         // Initialize with default selections
         updateTemplateSelection();
