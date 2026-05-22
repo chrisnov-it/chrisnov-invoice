@@ -4,6 +4,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
+from flask import current_app, has_app_context
 from io import BytesIO
 import os
 from xml.sax.saxutils import escape
@@ -52,10 +53,11 @@ def add_logo_if_exists(elements, config, max_width=1.5*inch, max_height=0.8*inch
     if not logo_filename:
         return
 
+    static_folder = current_app.static_folder if has_app_context() else os.path.join('app', 'static')
     if '/' in logo_filename or '\\' in logo_filename:
-        logo_path = os.path.join('app', 'static', *logo_filename.replace('\\', '/').split('/'))
+        logo_path = os.path.join(static_folder, *logo_filename.replace('\\', '/').split('/'))
     else:
-        logo_path = os.path.join('app', 'static', 'images', 'logo.png')
+        logo_path = os.path.join(static_folder, 'images', 'logo.png')
     
     if os.path.exists(logo_path):
         try:
@@ -79,7 +81,8 @@ def add_logo_if_exists(elements, config, max_width=1.5*inch, max_height=0.8*inch
             logo.drawWidth = new_width
             logo.drawHeight = new_height
             logo.hAlign = 'CENTER' if alignment == TA_CENTER else 'LEFT'
-            if alignment == TA_RIGHT: logo.hAlign = 'RIGHT'
+            if alignment == TA_RIGHT:
+                logo.hAlign = 'RIGHT'
             
             elements.append(logo)
             elements.append(Spacer(1, 0.1*inch))
