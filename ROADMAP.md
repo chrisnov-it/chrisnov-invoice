@@ -57,14 +57,20 @@ Welcome to the future of **Chrisnov Invoice**! We are committed to making this t
 3. **Enhanced Search & Sorting**
    - Advanced filtering for invoice lists (by status, date range, or client).
 
+## ✅ Completed (v1.4.0 "Payment Ready")
+
+- [x] **Online Payments Integration (Midtrans) 💸**
+  - Generate Snap payment links from any unpaid invoice.
+  - Supports QRIS, Virtual Account, Credit Card, and more.
+  - Auto-update invoice status to "Paid" on payment confirmation.
+  - Midtrans webhook for real-time status updates.
+  
 ## ✨ Phase 2: Communication & Convenience
 
 1. **Automated Payment Reminders ⏰**
    - Configurable "Gentle Nudge" system to automatically email clients 3 days after a due date.
 2. **Branded HTML Email Templates ✉️**
    - Move from plain-text emails to pixel-perfect, branded HTML templates that match your business style.
-3. **Online Payments Integration 💸**
-   - Support for Stripe and PayPal for direct-from-invoice payment processing.
 
 ## 🌐 Phase 3: The "SaaS" Leap
 

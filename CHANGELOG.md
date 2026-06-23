@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-06-23
+
+### Added
+
+- **Online Payments via Midtrans**: Generate payment links from any unpaid invoice. Supports QRIS, Virtual Account, and Credit Card. Invoice status auto-updates to "Paid" on settlement.
+- **Payment Service**: New `payment_service.py` for Midtrans Snap API integration with transaction creation, status checking, and webhook handler.
+- **Pay Online Button**: Appears on invoice view for unpaid/sent invoices. Hidden for paid, cancelled, and draft.
+- **Midtrans Webhook Endpoint**: `/payment/midtrans-webhook` for real-time payment status updates.
+
+### Infrastructure
+
+- **CI/CD Fix**: Regenerated GitHub Actions deploy SSH key after user recreation. Added `midtransclient` to `requirements.txt`.
+
 ## [Unreleased]
 
 ### Fixed

@@ -21,7 +21,8 @@
 - **Logo Upload**: Easily upload your company logo to be displayed on all invoices.
 - **Multi-Currency Support**: Invoice clients in different currencies (USD, EUR, IDR, and more).
 - **Flexible Tax Rates**: Set a default tax rate and override it on a per-invoice basis.
-- **Status Tracking**: Keep track of invoice statuses (Draft, Unpaid, Paid, Overdue).
+- **Status Tracking**: Keep track of invoice statuses (Draft, Sent, Unpaid, Paid, Overdue).
+- **Online Payments**: Accept payments directly via **Midtrans** (QRIS, Virtual Account, Credit Card). Generate payment links from any invoice.
 - **Responsive Design**: Access and manage your invoices on any device—desktop, tablet, or mobile.
 - **Internationalization (i18n)**: Fully supported English and Bahasa Indonesia interface, with persistent language selection.
 - **Search and Filter**: Quickly find invoices or clients with powerful search and filtering capabilities.
@@ -114,10 +115,23 @@ RATELIMIT_AUTH="5 per minute"
 RATELIMIT_DEFAULT="200 per hour"
 ITEMS_PER_PAGE=25
 MAX_CONTENT_LENGTH=16777216
+MIDTRANS_SERVER_KEY=your-midtrans-server-key
+MIDTRANS_CLIENT_KEY=your-midtrans-client-key
+MIDTRANS_IS_PRODUCTION=false
 ```
 
 Use `ALLOW_REGISTRATION=false` to close public signup. Keep `DATABASE_URL` unset for the default SQLite database; set it to a PostgreSQL URL only when you are ready to migrate the database.
 Run `flask --app run mark-overdue` from cron/systemd timer if you want overdue invoice status updates to happen automatically.
+
+### Online Payments (Midtrans)
+
+- **Path**: Opens automatically when you click **Pay Online** on an invoice.
+- **Prerequisites**:
+  1. Register at [Midtrans](https://midtrans.com) to get your Server Key & Client Key.
+  2. Set `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, and `MIDTRANS_IS_PRODUCTION` environment variables.
+  3. Supports **QRIS**, **Virtual Account** (BCA, Mandiri, etc.), **Credit Card**, and more.
+- **How it works**: Click "Pay Online" on an unpaid invoice → Midtrans Snap link generated → client pays via QRIS/VA/CC → invoice auto-updates to "Paid".
+- **Webhook**: Midtrans sends payment notifications to `/payment/midtrans-webhook`. Ensure this URL is reachable from the internet.
 
 ### Business Information
 
