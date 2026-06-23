@@ -227,7 +227,7 @@ def create_app(config_class=Config):
         )
     
     # Register blueprints
-    from app.routes import auth, dashboard, clients, invoices, settings, recurring_invoices
+    from app.routes import auth, dashboard, clients, invoices, settings, recurring_invoices, payment
 
     app.register_blueprint(auth.bp)
     app.register_blueprint(dashboard.bp)
@@ -235,5 +235,6 @@ def create_app(config_class=Config):
     app.register_blueprint(invoices.bp)
     app.register_blueprint(settings.bp)
     app.register_blueprint(recurring_invoices.bp)
+    app.register_blueprint(payment.bp)
     
     return app

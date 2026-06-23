@@ -73,9 +73,10 @@ class Invoice(db.Model):
     tax_amount = db.Column(db.Float, default=0.0)
     total = db.Column(db.Float, default=0.0)
     notes = db.Column(db.Text)
+    midtrans_order_id = db.Column(db.String(100), nullable=True, index=True)  # Midtrans payment tracking
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
     # Relationship
     items = db.relationship('InvoiceItem', backref='invoice', lazy=True, cascade='all, delete-orphan')
     

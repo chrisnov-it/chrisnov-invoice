@@ -71,6 +71,11 @@ class Config:
         if len(cls.SECRET_KEY) < 32:
             raise RuntimeError('SECRET_KEY must be at least 32 characters when APP_ENV=production.')
 
+    # Midtrans Payment Gateway
+    MIDTRANS_SERVER_KEY = os.environ.get('MIDTRANS_SERVER_KEY', '')
+    MIDTRANS_CLIENT_KEY = os.environ.get('MIDTRANS_CLIENT_KEY', '')
+    MIDTRANS_IS_PRODUCTION = os.environ.get('MIDTRANS_IS_PRODUCTION', 'false').lower() == 'true'
+
     # Email Settings (for local email sending)
     MAIL_SERVER = 'localhost'
     MAIL_PORT = 1025

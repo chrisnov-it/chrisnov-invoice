@@ -11,6 +11,12 @@
                 class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition">
                 <i class="fas fa-download mr-2"></i> Download PDF
             </a>
+            {% if config['MIDTRANS_SERVER_KEY'] and invoice.status not in ['paid', 'cancelled', 'draft'] %}
+            <a href="{{ url_for('payment.pay', invoice_id=invoice.id) }}"
+                class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition">
+                <i class="fas fa-credit-card mr-2"></i> Pay Online
+            </a>
+            {% endif %}
             {% if invoice.client.email %}
             <form method="POST" action="{{ url_for('invoices.email', id=invoice.id) }}" class="inline">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
