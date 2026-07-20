@@ -145,6 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
         quantityInput.name = 'quantity[]';
         quantityInput.placeholder = 'Quantity';
         quantityInput.setAttribute('aria-label', 'Item quantity');
+        quantityInput.setAttribute('inputmode', 'decimal');
         quantityInput.min = '0';
         quantityInput.step = '0.01';
         quantityInput.required = true;
@@ -159,6 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
         rateInput.name = 'rate[]';
         rateInput.placeholder = 'Rate';
         rateInput.setAttribute('aria-label', 'Item rate');
+        rateInput.setAttribute('inputmode', 'decimal');
         rateInput.min = '0';
         rateInput.step = '0.01';
         rateInput.required = true;

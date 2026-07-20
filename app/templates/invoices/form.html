@@ -3,6 +3,36 @@
 {% block page_title %}{% if invoice %}Edit Invoice{% else %}New Invoice{% endif %}{% endblock %}
 
 {% block content %}
+<style>
+/* Responsive invoice items: stack into cards on small screens */
+@media (max-width: 767px) {
+    .items-table .items-head { display: none; }
+    .items-table, .items-table tbody, .items-table tr, .items-table td { display: block; width: 100% !important; }
+    .items-table tr.item-row {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        padding: 0.5rem 0.25rem;
+        background: #fff;
+    }
+    .items-table td {
+        border: none !important;
+        padding: 0.5rem 0.75rem !important;
+        text-align: left !important;
+    }
+    .items-table td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #6b7280;
+        margin-bottom: 0.25rem;
+    }
+    .items-table td[data-label="Action"]::before { content: ""; }
+    .items-table .amount { font-weight: 600; }
+}
+</style>
 <div class="max-w-5xl mx-auto">
     <div class="bg-white rounded-lg shadow-md p-8">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">
@@ -60,7 +90,7 @@
                     <label for="tax_rate" class="block text-sm font-medium text-gray-700 mb-2">
                         Tax Rate (%)
                     </label>
-                    <input type="number" id="tax_rate" name="tax_rate" step="0.01" min="0"
+                    <input type="number" id="tax_rate" name="tax_rate" step="0.01" min="0" inputmode="decimal"
                            value="{% if invoice %}{{ invoice.tax_rate * 100 }}{% else %}{{ config['TAX_RATE'] * 100 }}{% endif %}"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
@@ -90,8 +120,8 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full" id="itemsTable">
-                        <thead class="bg-gray-50">
+                    <table class="w-full items-table" id="itemsTable">
+                        <thead class="bg-gray-50 items-head">
                             <tr>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase w-28">Unit</th>
@@ -105,14 +135,14 @@
                             {% if invoice and invoice.items %}
                                 {% for item in invoice.items %}
                                 <tr class="item-row">
-                                    <td class="px-4 py-2">
-                                        <label for="description_{{ loop.index0 }}" class="sr-only">Description</label>
-                                        <input type="text" id="description_{{ loop.index0 }}" name="description[]" value="{{ item.description }}" required
+                                    <td class="px-4 py-2" data-label="Description">
+                                        <label for="description_{{ loop.index0 }}" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Description</label>
+                                        <input type="text" id="description_{{ loop.index0 }}" name="description[]" value="{{ item.description }}" required inputmode="text"
                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
                                                placeholder="Service description">
                                     </td>
-                                    <td class="px-4 py-2">
-                                        <label for="unit_{{ loop.index0 }}" class="sr-only">Unit</label>
+                                    <td class="px-4 py-2" data-label="Unit">
+                                        <label for="unit_{{ loop.index0 }}" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Unit</label>
                                         <select id="unit_{{ loop.index0 }}" name="unit[]"
                                                 class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary unit">
                                             {% for unit_opt in config.get('UNITS', ['hours','days','pieces','project','flat','months','weeks','km','set']) %}
@@ -120,26 +150,26 @@
                                             {% endfor %}
                                         </select>
                                     </td>
-                                    <td class="px-4 py-2">
-                                        <label for="quantity_{{ loop.index0 }}" class="sr-only">Quantity</label>
-                                        <input type="number" id="quantity_{{ loop.index0 }}" name="quantity[]" value="{{ item.quantity }}" step="0.01" min="0" required
+                                    <td class="px-4 py-2" data-label="{{ config.get('ITEM_QTY_LABEL', 'Qty') }}">
+                                        <label for="quantity_{{ loop.index0 }}" class="block text-xs font-medium text-gray-500 md:hidden mb-1">{{ config.get('ITEM_QTY_LABEL', 'Qty') }}</label>
+                                        <input type="number" id="quantity_{{ loop.index0 }}" name="quantity[]" value="{{ item.quantity }}" step="0.01" min="0" required inputmode="decimal"
                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary quantity"
-                                               >
+                                               placeholder="0">
                                     </td>
-                                    <td class="px-4 py-2">
-                                        <label for="rate_{{ loop.index0 }}" class="sr-only">Rate</label>
-                                        <input type="number" name="rate[]" value="{{ item.rate }}" step="0.01" min="0" required
+                                    <td class="px-4 py-2" data-label="Rate">
+                                        <label for="rate_{{ loop.index0 }}" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Rate</label>
+                                        <input type="number" name="rate[]" value="{{ item.rate }}" step="0.01" min="0" required inputmode="decimal"
                                                id="rate_{{ loop.index0 }}" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary rate"
-                                               >
+                                               placeholder="0">
                                     </td>
-                                    <td class="px-4 py-2">
-                                        <label for="amount_{{ loop.index0 }}" class="sr-only">Amount</label>
+                                    <td class="px-4 py-2" data-label="Amount">
+                                        <label for="amount_{{ loop.index0 }}" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Amount</label>
                                         <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 amount" 
                                                id="amount_{{ loop.index0 }}"
                                                value="{{ '%.2f'|format(item.amount) }}" readonly>
                                     </td>
-                                    <td class="px-4 py-2">
-                                        <button type="button" class="remove-item-button text-red-600 hover:text-red-800" title="Remove Item" aria-label="Remove Item">
+                                    <td class="px-4 py-2" data-label="Action">
+                                        <button type="button" class="remove-item-button text-red-600 hover:text-red-800 mt-5 md:mt-0" title="Remove Item" aria-label="Remove Item">
                                             <i class="fas fa-trash" aria-hidden="true"></i>
                                         </button>
                                     </td>
@@ -147,14 +177,14 @@
                                 {% endfor %}
                             {% else %}
                                 <tr class="item-row">
-                                    <td class="px-4 py-2">
-                                        <label for="description_new" class="sr-only">Description</label>
-                                        <input type="text" name="description[]" required
+                                    <td class="px-4 py-2" data-label="Description">
+                                        <label for="description_new" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Description</label>
+                                        <input type="text" name="description[]" required inputmode="text"
                                                id="description_new" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
                                                placeholder="Service description">
                                     </td>
-                                    <td class="px-4 py-2">
-                                        <label for="unit_new" class="sr-only">Unit</label>
+                                    <td class="px-4 py-2" data-label="Unit">
+                                        <label for="unit_new" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Unit</label>
                                         <select id="unit_new" name="unit[]"
                                                 class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary unit">
                                             {% for unit_opt in config.get('UNITS', ['hours','days','pieces','project','flat','months','weeks','km','set']) %}
@@ -162,26 +192,26 @@
                                             {% endfor %}
                                         </select>
                                     </td>
-                                    <td class="px-4 py-2">
-                                        <label for="quantity_new" class="sr-only">Quantity</label>
-                                        <input type="number" name="quantity[]" value="1" step="0.01" min="0" required
+                                    <td class="px-4 py-2" data-label="{{ config.get('ITEM_QTY_LABEL', 'Qty') }}">
+                                        <label for="quantity_new" class="block text-xs font-medium text-gray-500 md:hidden mb-1">{{ config.get('ITEM_QTY_LABEL', 'Qty') }}</label>
+                                        <input type="number" name="quantity[]" value="1" step="0.01" min="0" required inputmode="decimal"
                                                id="quantity_new" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary quantity"
-                                               >
+                                               placeholder="0">
                                     </td>
-                                    <td class="px-4 py-2">
-                                        <label for="rate_new" class="sr-only">Rate</label>
-                                        <input type="number" name="rate[]" step="0.01" min="0" required
+                                    <td class="px-4 py-2" data-label="Rate">
+                                        <label for="rate_new" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Rate</label>
+                                        <input type="number" name="rate[]" step="0.01" min="0" required inputmode="decimal"
                                                id="rate_new" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary rate"
-                                               >
+                                               placeholder="0">
                                     </td>
-                                    <td class="px-4 py-2">
-                                        <label for="amount_new" class="sr-only">Amount</label>
+                                    <td class="px-4 py-2" data-label="Amount">
+                                        <label for="amount_new" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Amount</label>
                                         <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 amount" 
                                                id="amount_new"
                                                value="0.00" readonly>
                                     </td>
-                                    <td class="px-4 py-2">
-                                        <button type="button" class="remove-item-button text-red-600 hover:text-red-800" title="Remove Item" aria-label="Remove Item">
+                                    <td class="px-4 py-2" data-label="Action">
+                                        <button type="button" class="remove-item-button text-red-600 hover:text-red-800 mt-5 md:mt-0" title="Remove Item" aria-label="Remove Item">
                                             <i class="fas fa-trash" aria-hidden="true"></i>
                                         </button>
                                     </td>
@@ -239,16 +269,19 @@
 <script>
 let itemCount = 0;
 
-function createCell() {
+function createCell(label) {
     const cell = document.createElement('td');
     cell.className = 'px-4 py-2';
+    if (label) {
+        cell.setAttribute('data-label', label);
+    }
     return cell;
 }
 
 function createLabel(targetId, text) {
     const label = document.createElement('label');
     label.htmlFor = targetId;
-    label.className = 'sr-only';
+    label.className = 'block text-xs font-medium text-gray-500 md:hidden mb-1';
     label.textContent = text;
     return label;
 }
@@ -265,6 +298,10 @@ function createInput(options) {
 
     if (options.placeholder) {
         input.placeholder = options.placeholder;
+    }
+
+    if (options.inputmode) {
+        input.setAttribute('inputmode', options.inputmode);
     }
 
     if (options.value !== undefined) {
@@ -301,7 +338,9 @@ function addItem() {
     const rateId = `rate_new_${itemCount}`;
     const amountId = `amount_new_${itemCount}`;
 
-    const descriptionCell = createCell();
+    const qtyLabel = '{{ config.get("ITEM_QTY_LABEL", "Qty") }}';
+
+    const descriptionCell = createCell('Description');
     descriptionCell.append(
         createLabel(descriptionId, 'Description'),
         createInput({
@@ -310,11 +349,12 @@ function addItem() {
             id: descriptionId,
             className: 'w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary',
             placeholder: 'Service description',
+            inputmode: 'text',
             required: true
         })
     );
 
-    const unitCell = createCell();
+    const unitCell = createCell('Unit');
     const unitSelect = document.createElement('select');
     unitSelect.name = 'unit[]';
     unitSelect.id = unitId;
@@ -331,9 +371,9 @@ function addItem() {
     unitCell.appendChild(createLabel(unitId, 'Unit'));
     unitCell.appendChild(unitSelect);
 
-    const quantityCell = createCell();
+    const quantityCell = createCell(qtyLabel);
     quantityCell.append(
-        createLabel(quantityId, 'Quantity'),
+        createLabel(quantityId, qtyLabel),
         createInput({
             type: 'number',
             name: 'quantity[]',
@@ -342,11 +382,13 @@ function addItem() {
             value: '1',
             step: '0.01',
             min: '0',
+            inputmode: 'decimal',
+            placeholder: '0',
             required: true
         })
     );
 
-    const rateCell = createCell();
+    const rateCell = createCell('Rate');
     rateCell.append(
         createLabel(rateId, 'Rate'),
         createInput({
@@ -356,11 +398,13 @@ function addItem() {
             className: 'w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary rate',
             step: '0.01',
             min: '0',
+            inputmode: 'decimal',
+            placeholder: '0',
             required: true
         })
     );
 
-    const amountCell = createCell();
+    const amountCell = createCell('Amount');
     amountCell.append(
         createLabel(amountId, 'Amount'),
         createInput({
@@ -372,10 +416,10 @@ function addItem() {
         })
     );
 
-    const actionCell = createCell();
+    const actionCell = createCell('Action');
     const removeButton = document.createElement('button');
     removeButton.type = 'button';
-    removeButton.className = 'remove-item-button text-red-600 hover:text-red-800';
+    removeButton.className = 'remove-item-button text-red-600 hover:text-red-800 mt-5 md:mt-0';
     removeButton.title = 'Remove Item';
     removeButton.setAttribute('aria-label', 'Remove Item');
 
