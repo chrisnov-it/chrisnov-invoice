@@ -12,6 +12,10 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or DEV_SECRET_KEY
     SQLALCHEMY_DATABASE_URI = DATABASE_URL or 'sqlite:///chrisnov_invoice.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_recycle': 280,
+        'pool_pre_ping': True,
+    }
     DATABASE_ADMIN_USER_ID = int(os.environ.get('DATABASE_ADMIN_USER_ID', '1'))
     ALLOW_REGISTRATION = os.environ.get('ALLOW_REGISTRATION', 'true').lower() in ('1', 'true', 'yes', 'on')
 
