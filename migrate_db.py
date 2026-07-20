@@ -33,12 +33,8 @@ def migrate_data():
         target_engine = create_engine(TARGET_DATABASE_URL)
         
         # We need to recreate tables in target
-        app.config['SQLALCHEMY_DATABASE_URI'] = TARGET_DATABASE_URL
-        db.init_app(app) # re-init just to be safe, although not strictly necessary 
-        db.engine = target_engine
-        
         print("Creating tables in target database...")
-        db.create_all()
+        db.metadata.create_all(target_engine)
         
         TargetSession = sessionmaker(bind=target_engine)
         target_session = TargetSession()
