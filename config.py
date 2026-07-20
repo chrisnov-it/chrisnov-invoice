@@ -38,6 +38,9 @@ class Config:
     # Invoice Settings
     TAX_RATE = 0.11  # 11% tax
     DEFAULT_CURRENCY = "IDR"
+    ITEM_QTY_LABEL = "Qty"
+    UNITS = ['hours', 'days', 'pieces', 'project', 'flat', 'months', 'weeks', 'km', 'set']
+    DEFAULT_UNIT = "pieces"
 
     # Supported Currencies
     SUPPORTED_CURRENCIES = {

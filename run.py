@@ -21,6 +21,8 @@ def ensure_ownership_columns():
     add_column_if_missing('clients', 'website', 'website VARCHAR(255)')
     add_column_if_missing('invoices', 'user_id', 'user_id INTEGER')
     add_column_if_missing('recurring_invoices', 'user_id', 'user_id INTEGER')
+    add_column_if_missing('invoice_items', 'unit', "unit VARCHAR(20) DEFAULT 'pieces'")
+    add_column_if_missing('recurring_invoice_items', 'unit', "unit VARCHAR(20) DEFAULT 'pieces'")
 
     if User.query.count() == 1:
         owner_id = User.query.first().id
@@ -77,6 +79,7 @@ def generate_recurring_invoices():
         for r_item in r_invoice.items:
             new_item = InvoiceItem(
                 description=r_item.description,
+                unit=r_item.unit,
                 quantity=r_item.quantity,
                 rate=r_item.rate
             )

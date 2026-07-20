@@ -518,6 +518,23 @@
                             Show company logo on invoices
                         </label>
                     </div>
+
+                    <div class="border-t pt-4 mt-4">
+                        <label for="item_qty_label" class="block text-sm font-medium text-gray-700 mb-2">Quantity Column Label</label>
+                        <input type="text" id="item_qty_label" name="item_qty_label" 
+                               value="{{ config.get('ITEM_QTY_LABEL', 'Qty') }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                               placeholder="e.g. Qty, Hours, Days">
+                        <p class="mt-1 text-sm text-gray-500">Label for the quantity column in invoice items table</p>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" id="show_unit" name="show_unit" {% if config.get('PDF_SHOW_UNIT', True) %}checked{% endif %}
+                            class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                        <label for="show_unit" class="ml-2 block text-sm text-gray-700">
+                            Show unit column on invoice PDFs
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -701,6 +718,10 @@
                 if (selectedLogoPosition) params.set('logo_position', selectedLogoPosition.value);
                 if (footerText) params.set('footer_text', footerText.value);
                 if (showLogo && showLogo.checked) params.set('show_logo', 'on');
+                const showUnit = document.getElementById('show_unit');
+                const itemQtyLabel = document.getElementById('item_qty_label');
+                if (showUnit && showUnit.checked) params.set('show_unit', 'on');
+                if (itemQtyLabel) params.set('item_qty_label', itemQtyLabel.value);
 
                 const previewUrl = `${previewButton.dataset.previewUrl}?${params.toString()}`;
                 window.open(previewUrl, '_blank', 'noopener');

@@ -141,7 +141,10 @@
                 <thead>
                     <tr class="bg-primary text-white">
                         <th class="px-4 py-3 text-left">Description</th>
-                        <th class="px-4 py-3 text-right w-24">Quantity</th>
+                        {% if config.get('PDF_SHOW_UNIT', True) %}
+                        <th class="px-4 py-3 text-left w-24">Unit</th>
+                        {% endif %}
+                        <th class="px-4 py-3 text-right w-24">{{ config.get('ITEM_QTY_LABEL', 'Qty') }}</th>
                         <th class="px-4 py-3 text-right w-32">Rate</th>
                         <th class="px-4 py-3 text-right w-32">Amount</th>
                     </tr>
@@ -150,6 +153,9 @@
                     {% for item in invoice.items %}
                     <tr class="border-b border-gray-200 {% if loop.index is odd %}bg-gray-50{% endif %}">
                         <td class="px-4 py-3 text-gray-800">{{ item.description }}</td>
+                        {% if config.get('PDF_SHOW_UNIT', True) %}
+                        <td class="px-4 py-3 text-gray-700">{{ item.unit }}</td>
+                        {% endif %}
                         <td class="px-4 py-3 text-right text-gray-700">{{ "%.2f"|format(item.quantity) }}</td>
                         <td class="px-4 py-3 text-right text-gray-700">{{ item.rate|format_currency(invoice.currency) }}
                         </td>

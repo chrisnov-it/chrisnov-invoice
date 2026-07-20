@@ -96,7 +96,9 @@ def build_pdf_settings_from_request():
         'PDF_ACCENT_COLOR': accent_color,
         'PDF_LOGO_POSITION': logo_position,
         'PDF_FOOTER_TEXT': footer_text or 'Thank you for your business!',
-        'PDF_SHOW_LOGO': request.values.get('show_logo') == 'on'
+        'PDF_SHOW_LOGO': request.values.get('show_logo') == 'on',
+        'PDF_SHOW_UNIT': request.values.get('show_unit') == 'on',
+        'ITEM_QTY_LABEL': request.values.get('item_qty_label', current_app.config.get('ITEM_QTY_LABEL', 'Qty')),
     }
 
 def build_sample_invoice():
@@ -110,8 +112,8 @@ def build_sample_invoice():
         phone='+62 812-0000-0000'
     )
     items = [
-        SimpleNamespace(description='Web Development Service', quantity=1, rate=5000000, amount=5000000),
-        SimpleNamespace(description='Monthly Maintenance', quantity=2, rate=750000, amount=1500000),
+        SimpleNamespace(description='Web Development Service', unit='project', quantity=1, rate=5000000, amount=5000000),
+        SimpleNamespace(description='Monthly Maintenance', unit='months', quantity=2, rate=750000, amount=1500000),
     ]
     invoice = SimpleNamespace(
         invoice_number='INV-PREVIEW-001',
@@ -301,7 +303,8 @@ def business():
             'BUSINESS_WEBSITE': business_website,
             'BUSINESS_ADDRESS': business_address,
             'TAX_RATE': str(tax_rate),
-            'DEFAULT_CURRENCY': default_currency
+            'DEFAULT_CURRENCY': default_currency,
+            'ITEM_QTY_LABEL': request.form.get('item_qty_label', 'Qty').strip() or 'Qty',
         }
 
         # Update database and config
@@ -371,7 +374,9 @@ def pdf_templates():
                 'PDF_ACCENT_COLOR': 'blue',
                 'PDF_LOGO_POSITION': 'left',
                 'PDF_FOOTER_TEXT': 'Thank you for your business!',
-                'PDF_SHOW_LOGO': 'True'
+                'PDF_SHOW_LOGO': 'True',
+                'PDF_SHOW_UNIT': 'True',
+                'ITEM_QTY_LABEL': 'Qty',
             }
         else:
             allowed_templates = {'professional', 'modern', 'minimal', 'elegant'}
@@ -385,6 +390,8 @@ def pdf_templates():
             logo_position = request.form.get('logo_position', 'left')
             footer_text = request.form.get('footer_text', '').strip()
             show_logo = request.form.get('show_logo') == 'on'
+            show_unit = request.form.get('show_unit') == 'on'
+            item_qty_label = request.form.get('item_qty_label', 'Qty').strip() or 'Qty'
 
             if pdf_template not in allowed_templates:
                 flash('Invalid PDF template selected.', 'error')
@@ -406,13 +413,15 @@ def pdf_templates():
                 'PDF_ACCENT_COLOR': accent_color,
                 'PDF_LOGO_POSITION': logo_position,
                 'PDF_FOOTER_TEXT': footer_text or 'Thank you for your business!',
-                'PDF_SHOW_LOGO': str(show_logo)
+                'PDF_SHOW_LOGO': str(show_logo),
+                'PDF_SHOW_UNIT': str(show_unit),
+                'ITEM_QTY_LABEL': item_qty_label,
             }
 
         # Update database and config
         for key, value in settings_to_update.items():
             update_setting(key, value)
-            if key == 'PDF_SHOW_LOGO':
+            if key in ('PDF_SHOW_LOGO', 'PDF_SHOW_UNIT'):
                 current_app.config[key] = (value.lower() == 'true')
             else:
                 current_app.config[key] = value

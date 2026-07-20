@@ -120,6 +120,24 @@ document.addEventListener('DOMContentLoaded', function() {
         descriptionInput.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg';
         descriptionWrapper.appendChild(descriptionInput);
 
+        const unitWrapper = document.createElement('div');
+        unitWrapper.classList.add('w-28');
+        const unitSelect = document.createElement('select');
+        unitSelect.name = 'unit[]';
+        unitSelect.setAttribute('aria-label', 'Item unit');
+        unitSelect.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg';
+        const units = {{ config.get('UNITS', ['hours','days','pieces','project','flat','months','weeks','km','set']) | tojson }};
+        const defaultUnit = '{{ config.get("DEFAULT_UNIT", "pieces") }}';
+        units.forEach(function(u) {
+            const opt = document.createElement('option');
+            opt.value = u;
+            opt.textContent = u;
+            if (item && item.unit === u) opt.selected = true;
+            else if (!item && u === defaultUnit) opt.selected = true;
+            unitSelect.appendChild(opt);
+        });
+        unitWrapper.appendChild(unitSelect);
+
         const quantityWrapper = document.createElement('div');
         quantityWrapper.classList.add('w-24');
         const quantityInput = document.createElement('input');
@@ -159,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
         removeButton.appendChild(removeIcon);
         actionWrapper.appendChild(removeButton);
 
-        itemDiv.append(descriptionWrapper, quantityWrapper, rateWrapper, actionWrapper);
+        itemDiv.append(descriptionWrapper, unitWrapper, quantityWrapper, rateWrapper, actionWrapper);
         itemsContainer.appendChild(itemDiv);
     }
 

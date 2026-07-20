@@ -231,11 +231,22 @@ def generate_professional_pdf(invoice, config, buffer):
 
     # Items table
     elements.append(Paragraph("<b>Items</b>", heading_style))
-    data = [['Description', 'Quantity', 'Rate', 'Amount']]
+    show_unit = config.get('PDF_SHOW_UNIT', True)
+    qty_label = config.get('ITEM_QTY_LABEL', 'Qty')
+    if show_unit:
+        data = [['Description', 'Unit', qty_label, 'Rate', 'Amount']]
+    else:
+        data = [['Description', qty_label, 'Rate', 'Amount']]
     for item in invoice.items:
-        data.append([pdf_text(item.description), f"{item.quantity:.2f}", format_currency(item.rate, invoice.currency, config), format_currency(item.amount, invoice.currency, config)])
+        if show_unit:
+            data.append([Paragraph(pdf_text(item.description), normal_style), item.unit or '', f"{item.quantity:.2f}", format_currency(item.rate, invoice.currency, config), format_currency(item.amount, invoice.currency, config)])
+        else:
+            data.append([Paragraph(pdf_text(item.description), normal_style), f"{item.quantity:.2f}", format_currency(item.rate, invoice.currency, config), format_currency(item.amount, invoice.currency, config)])
 
-    items_table = Table(data, colWidths=[3.5*inch, 1*inch, 1*inch, 1.5*inch])
+    if show_unit:
+        items_table = Table(data, colWidths=[2.8*inch, 0.7*inch, 0.7*inch, 1*inch, 1.5*inch])
+    else:
+        items_table = Table(data, colWidths=[3.5*inch, 1*inch, 1*inch, 1.5*inch])
     items_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), header_bg_color),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -362,16 +373,33 @@ def generate_modern_pdf(invoice, config, buffer):
     ]
 
     # Items table
-    data = [['DESCRIPTION', 'QTY', 'RATE', 'AMOUNT']]
+    show_unit = config.get('PDF_SHOW_UNIT', True)
+    qty_label = config.get('ITEM_QTY_LABEL', 'Qty')
+    if show_unit:
+        data = [['DESCRIPTION', 'UNIT', qty_label.upper(), 'RATE', 'AMOUNT']]
+    else:
+        data = [['DESCRIPTION', qty_label.upper(), 'RATE', 'AMOUNT']]
     for item in invoice.items:
-        data.append([
-            Paragraph(pdf_text(item.description), normal_style),
-            f"{item.quantity:.2f}",
-            format_currency(item.rate, invoice.currency, config),
-            format_currency(item.amount, invoice.currency, config)
-        ])
+        if show_unit:
+            data.append([
+                Paragraph(pdf_text(item.description), normal_style),
+                item.unit or '',
+                f"{item.quantity:.2f}",
+                format_currency(item.rate, invoice.currency, config),
+                format_currency(item.amount, invoice.currency, config)
+            ])
+        else:
+            data.append([
+                Paragraph(pdf_text(item.description), normal_style),
+                f"{item.quantity:.2f}",
+                format_currency(item.rate, invoice.currency, config),
+                format_currency(item.amount, invoice.currency, config)
+            ])
 
-    items_table = Table(data, colWidths=[2.3*inch, 0.6*inch, 0.8*inch, 1*inch], repeatRows=1)
+    if show_unit:
+        items_table = Table(data, colWidths=[2.0*inch, 0.5*inch, 0.5*inch, 0.8*inch, 1*inch], repeatRows=1)
+    else:
+        items_table = Table(data, colWidths=[2.3*inch, 0.6*inch, 0.8*inch, 1*inch], repeatRows=1)
     items_table.setStyle(TableStyle([
         ('FONTNAME', (0, 0), (-1, 0), main_font_bold),
         ('FONTSIZE', (0, 0), (-1, 0), 9),
@@ -507,16 +535,33 @@ def generate_minimal_pdf(invoice, config, buffer):
     elements.append(Spacer(1, 0.4*inch))
 
     # Items table
-    data = [['DESCRIPTION', 'QTY', 'RATE', 'AMOUNT']]
+    show_unit = config.get('PDF_SHOW_UNIT', True)
+    qty_label = config.get('ITEM_QTY_LABEL', 'Qty')
+    if show_unit:
+        data = [['DESCRIPTION', 'UNIT', qty_label.upper(), 'RATE', 'AMOUNT']]
+    else:
+        data = [['DESCRIPTION', qty_label.upper(), 'RATE', 'AMOUNT']]
     for item in invoice.items:
-        data.append([
-            Paragraph(pdf_text(item.description), normal_style),
-            f"{item.quantity:.2f}",
-            format_currency(item.rate, invoice.currency, config),
-            format_currency(item.amount, invoice.currency, config)
-        ])
+        if show_unit:
+            data.append([
+                Paragraph(pdf_text(item.description), normal_style),
+                item.unit or '',
+                f"{item.quantity:.2f}",
+                format_currency(item.rate, invoice.currency, config),
+                format_currency(item.amount, invoice.currency, config)
+            ])
+        else:
+            data.append([
+                Paragraph(pdf_text(item.description), normal_style),
+                f"{item.quantity:.2f}",
+                format_currency(item.rate, invoice.currency, config),
+                format_currency(item.amount, invoice.currency, config)
+            ])
 
-    items_table = Table(data, colWidths=[3.5*inch, 1*inch, 1*inch, 1.5*inch], repeatRows=1)
+    if show_unit:
+        items_table = Table(data, colWidths=[2.8*inch, 0.7*inch, 0.7*inch, 1*inch, 1.5*inch], repeatRows=1)
+    else:
+        items_table = Table(data, colWidths=[3.5*inch, 1*inch, 1*inch, 1.5*inch], repeatRows=1)
     items_table.setStyle(TableStyle([
         ('FONTNAME', (0, 0), (-1, 0), main_font_bold),
         ('FONTSIZE', (0, 0), (-1, 0), 9),
@@ -629,22 +674,45 @@ def generate_elegant_pdf(invoice, config, buffer):
 
     # --- Items Table ---
     # Header
-    data = [[
-        Paragraph('<b>DESCRIPTION</b>', heading_style),
-        Paragraph('<b>QTY</b>', ParagraphStyle('ElegantQtyHeader', parent=heading_style, alignment=TA_RIGHT)),
-        Paragraph('<b>RATE</b>', ParagraphStyle('ElegantRateHeader', parent=heading_style, alignment=TA_RIGHT)),
-        Paragraph('<b>AMOUNT</b>', ParagraphStyle('ElegantAmountHeader', parent=heading_style, alignment=TA_RIGHT))
-    ]]
+    show_unit = config.get('PDF_SHOW_UNIT', True)
+    qty_label = config.get('ITEM_QTY_LABEL', 'Qty')
+    if show_unit:
+        data = [[
+            Paragraph('<b>DESCRIPTION</b>', heading_style),
+            Paragraph('<b>UNIT</b>', ParagraphStyle('ElegantUnitHeader', parent=heading_style, alignment=TA_RIGHT)),
+            Paragraph(f'<b>{qty_label.upper()}</b>', ParagraphStyle('ElegantQtyHeader', parent=heading_style, alignment=TA_RIGHT)),
+            Paragraph('<b>RATE</b>', ParagraphStyle('ElegantRateHeader', parent=heading_style, alignment=TA_RIGHT)),
+            Paragraph('<b>AMOUNT</b>', ParagraphStyle('ElegantAmountHeader', parent=heading_style, alignment=TA_RIGHT))
+        ]]
+    else:
+        data = [[
+            Paragraph('<b>DESCRIPTION</b>', heading_style),
+            Paragraph(f'<b>{qty_label.upper()}</b>', ParagraphStyle('ElegantQtyHeader', parent=heading_style, alignment=TA_RIGHT)),
+            Paragraph('<b>RATE</b>', ParagraphStyle('ElegantRateHeader', parent=heading_style, alignment=TA_RIGHT)),
+            Paragraph('<b>AMOUNT</b>', ParagraphStyle('ElegantAmountHeader', parent=heading_style, alignment=TA_RIGHT))
+        ]]
     
     for item in invoice.items:
-        data.append([
-            Paragraph(pdf_text(item.description), normal_style),
-            Paragraph(f"{item.quantity:.2f}", right_style),
-            Paragraph(format_currency(item.rate, invoice.currency, config), right_style),
-            Paragraph(format_currency(item.amount, invoice.currency, config), right_style)
-        ])
+        if show_unit:
+            data.append([
+                Paragraph(pdf_text(item.description), normal_style),
+                Paragraph(item.unit or '', right_style),
+                Paragraph(f"{item.quantity:.2f}", right_style),
+                Paragraph(format_currency(item.rate, invoice.currency, config), right_style),
+                Paragraph(format_currency(item.amount, invoice.currency, config), right_style)
+            ])
+        else:
+            data.append([
+                Paragraph(pdf_text(item.description), normal_style),
+                Paragraph(f"{item.quantity:.2f}", right_style),
+                Paragraph(format_currency(item.rate, invoice.currency, config), right_style),
+                Paragraph(format_currency(item.amount, invoice.currency, config), right_style)
+            ])
 
-    items_table = Table(data, colWidths=[3.5*inch, 1*inch, 1*inch, 1.5*inch], repeatRows=1)
+    if show_unit:
+        items_table = Table(data, colWidths=[2.8*inch, 0.7*inch, 0.7*inch, 1*inch, 1.5*inch], repeatRows=1)
+    else:
+        items_table = Table(data, colWidths=[3.5*inch, 1*inch, 1*inch, 1.5*inch], repeatRows=1)
     items_table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('LINEBELOW', (0, 0), (-1, 0), 0.5, colors.black),  # Header line

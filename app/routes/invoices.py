@@ -82,13 +82,15 @@ def new():
             
             # Add items
             descriptions = request.form.getlist('description[]')
+            units = request.form.getlist('unit[]')
             quantities = request.form.getlist('quantity[]')
             rates = request.form.getlist('rate[]')
             
-            for desc, qty, rate in zip(descriptions, quantities, rates):
+            for desc, unit, qty, rate in zip(descriptions, units, quantities, rates):
                 if desc and qty and rate:
                     item = InvoiceItem(
                         description=desc,
+                        unit=unit or 'pieces',
                         quantity=float(qty),
                         rate=float(rate)
                     )
@@ -147,14 +149,16 @@ def edit(id):
             
             # Add new items
             descriptions = request.form.getlist('description[]')
+            units = request.form.getlist('unit[]')
             quantities = request.form.getlist('quantity[]')
             rates = request.form.getlist('rate[]')
             
-            for desc, qty, rate in zip(descriptions, quantities, rates):
+            for desc, unit, qty, rate in zip(descriptions, units, quantities, rates):
                 if desc and qty and rate:
                     item = InvoiceItem(
                         invoice_id=invoice.id,
                         description=desc,
+                        unit=unit or 'pieces',
                         quantity=float(qty),
                         rate=float(rate)
                     )

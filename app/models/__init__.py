@@ -114,6 +114,7 @@ class InvoiceItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     invoice_id = db.Column(db.Integer, db.ForeignKey('invoices.id'), nullable=False)
     description = db.Column(db.String(500), nullable=False)
+    unit = db.Column(db.String(20), default='pieces')
     quantity = db.Column(db.Float, default=1.0)
     rate = db.Column(db.Float, nullable=False)
     amount = db.Column(db.Float, nullable=False)
@@ -129,6 +130,7 @@ class InvoiceItem(db.Model):
         return {
             'id': self.id,
             'description': self.description,
+            'unit': self.unit,
             'quantity': self.quantity,
             'rate': self.rate,
             'amount': self.amount
@@ -166,6 +168,7 @@ class RecurringInvoiceItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     recurring_invoice_id = db.Column(db.Integer, db.ForeignKey('recurring_invoices.id'), nullable=False)
     description = db.Column(db.String(500), nullable=False)
+    unit = db.Column(db.String(20), default='pieces')
     quantity = db.Column(db.Float, default=1.0)
     rate = db.Column(db.Float, nullable=False)
 
