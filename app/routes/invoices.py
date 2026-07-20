@@ -8,19 +8,23 @@ from flask_login import current_user
 
 bp = Blueprint('invoices', __name__, url_prefix='/invoices')
 
-def generate_invoice_number():
+def generate_invoice_number(user_id=None):
     """Generate a unique invoice number for the current user.
 
-    Uses an INV-YYYYMM-NNNN format but guarantees global uniqueness for the
+    Uses an INV-YYYYMM-NNNN format but guarantees uniqueness for the
     user by checking the full number (not just the current month) and looping
     until a free number is found.
     """
+    if user_id is None:
+        user_id = current_user.id
+        
     today = datetime.now()
     prefix = f"INV-{today.strftime('%Y%m')}"
 
-    # invoice_number is globally UNIQUE, so we must consider every invoice in
-    # the database (not just the current user's) when picking the next number.
+    # invoice_number is unique per user_id, so we must consider every invoice in
+    # the database for this user when picking the next number.
     existing = Invoice.query.filter(
+        Invoice.user_id == user_id,
         Invoice.invoice_number.like('INV-____-____')
     ).all()
     max_num = 0
@@ -31,6 +35,7 @@ def generate_invoice_number():
 
     # Always at least beat this month's naive sequence.
     month_invoices = Invoice.query.filter(
+        Invoice.user_id == user_id,
         Invoice.invoice_number.like(f"{prefix}%")
     ).all()
     for inv in month_invoices:
@@ -41,7 +46,7 @@ def generate_invoice_number():
     candidate = f"{prefix}-{max_num + 1:04d}"
 
     # Safety loop: if the candidate somehow already exists, keep incrementing.
-    while Invoice.query.filter_by(invoice_number=candidate).first():
+    while Invoice.query.filter_by(user_id=user_id, invoice_number=candidate).first():
         max_num += 1
         candidate = f"{prefix}-{max_num + 1:04d}"
 

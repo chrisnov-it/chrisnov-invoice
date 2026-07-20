@@ -62,7 +62,7 @@ class Invoice(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
-    invoice_number = db.Column(db.String(50), unique=True, nullable=False)
+    invoice_number = db.Column(db.String(50), nullable=False)
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
     issue_date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
     due_date = db.Column(db.Date, nullable=False)
@@ -79,6 +79,8 @@ class Invoice(db.Model):
 
     # Relationship
     items = db.relationship('InvoiceItem', backref='invoice', lazy=True, cascade='all, delete-orphan')
+    
+    __table_args__ = (db.UniqueConstraint('user_id', 'invoice_number', name='uq_user_invoice_number'),)
     
     def __repr__(self):
         return f'<Invoice {self.invoice_number}>'

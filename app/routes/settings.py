@@ -456,12 +456,17 @@ def pdf_template_preview():
 def backup_index():
     """Display backup and restore options"""
     require_database_admin()
-    return render_template('settings/backup.html')
+    is_sqlite = current_app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite')
+    return render_template('settings/backup.html', is_sqlite=is_sqlite)
 
 @bp.route('/backup/export', methods=['GET'])
 def export_db():
     """Download current database file"""
     require_database_admin()
+    if not current_app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite'):
+        flash('Database export is only supported for SQLite.', 'error')
+        return redirect(url_for('settings.backup_index'))
+        
     db_path = BackupService.get_db_path()
     if os.path.exists(db_path):
         timestamp = datetime.now().strftime('%Y-%m-%d_%H%M%S')
@@ -477,6 +482,9 @@ def export_db():
 def import_db():
     """Restore database from uploaded file"""
     require_database_admin()
+    if not current_app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite'):
+        flash('Database import is only supported for SQLite.', 'error')
+        return redirect(url_for('settings.backup_index'))
     if 'backup_file' not in request.files:
         flash('No file uploaded.', 'error')
         return redirect(url_for('settings.backup_index'))

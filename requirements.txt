@@ -15,3 +15,4 @@ gunicorn==22.0.0
 python-dotenv==1.2.2
 psycopg2-binary==2.9.12
 midtransclient==1.4.2
+PyMySQL==1.1.1

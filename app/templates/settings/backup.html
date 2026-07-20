@@ -4,6 +4,12 @@
 
 {% block page_title %}{{ _('Backup & Restore') }}{% endblock %}
 
+{% extends "base.html" %}
+
+{% block title %}{{ _('Backup & Restore') }} - {{ config['BUSINESS_NAME'] }}{% endblock %}
+
+{% block page_title %}{{ _('Backup & Restore') }}{% endblock %}
+
 {% block content %}
 <div class="max-w-4xl mx-auto">
     <div class="mb-6 flex items-center">
@@ -12,6 +18,21 @@
         </a>
         <h1 class="text-2xl font-bold text-gray-800">{{ _('Database Management') }}</h1>
     </div>
+
+    {% if not is_sqlite %}
+    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-8 rounded-r-lg">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-blue-400"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-blue-700">
+                    <strong>{{ _('Notice:') }}</strong> {{ _('Your application is connected to a production database (MySQL/PostgreSQL). The built-in backup and restore features are disabled. Please use your database server\'s native backup tools (e.g., mysqldump) or your hosting provider\'s backup solution to manage data safely.') }}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% else %}
 
     <!-- Backup Section -->
     <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8 animate-fade-in">
@@ -100,6 +121,7 @@
             </form>
         </div>
     </div>
+    {% endif %}
 </div>
 
 <script>
