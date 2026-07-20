@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2026-07-20
+
+### Added
+
+- **Customizable Invoice Item Unit**: New `unit` column on invoice and recurring invoice items with a dropdown (hours, days, pieces, project, flat, months, weeks, km, set). Useful for service businesses (e.g. lawyers billing by `hours`).
+- **Dynamic Quantity Column Label**: `ITEM_QTY_LABEL` setting lets you rename the quantity column header to "Hours", "Days", "Units", etc. Configurable from Business Settings and PDF Templates.
+- **Unit Column Toggle on PDF**: `PDF_SHOW_UNIT` setting (PDF Templates) to show or hide the unit column on generated invoices.
+- **Multi-Business Readiness**: Invoice item structure is now flexible enough for goods and service businesses alike.
+
+### Changed
+
+- **Recurring Invoice Generation**: `generate-recurring` CLI now copies the `unit` field from the recurring template to the generated invoice item.
+
+### Fixed
+
+- **PDF Text Wrapping (Professional Template)**: Long item descriptions now wrap correctly inside table cells (previously overflowed) by rendering descriptions as ReportLab `Paragraph` objects.
+- **Schema Migration Safety**: `flask --app run init-db` now adds missing columns (including `invoice_items.unit` and `recurring_invoice_items.unit`) via `add_column_if_missing`, preventing "no such column" errors after deploys.
+
+### Infrastructure
+
+- **Backup & Restore Hardening**: Restrict full database export/restore to the configured database owner and validate uploaded SQLite backups before replacing the active database.
+- **Production Secret Management**: Require a strong `SECRET_KEY` when `APP_ENV=production` and enable stricter production session cookie settings.
+- **Dependency Security**: Upgrade Flask and python-dotenv to versions with current CVE fixes.
+- **Upload Hardening**: Add a configurable request size limit for file uploads.
+- **Auth Hardening**: Add login/register rate limiting and a configurable registration toggle.
+- **Multi-user Hardening**: Store uploaded logos per user and restrict global currency add/delete actions to the configured database owner.
+- **Scalability Hardening**: Add pagination to invoice, client, and recurring invoice lists.
+- **Operational Hardening**: Move overdue invoice status updates to a CLI command and allow `DATABASE_URL` for future PostgreSQL deployments.
+- **Version Display**: Show the app version on auth pages as well as the main app footer.
+- **Email Settings Hardening**: Keep saved SMTP passwords out of rendered forms and validate SMTP port values server-side.
+- **PDF Template Hardening**: Validate template settings, make logo controls persist correctly, add a working reset action, and escape PDF text content before rendering.
+
 ## [1.4.0] - 2026-06-23
 
 ### Added
@@ -17,19 +49,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### Fixed
+### Planned
 
-- **Backup & Restore Hardening**: Restrict full database export/restore to the configured database owner and validate uploaded SQLite backups before replacing the active database.
-- **Production Secret Management**: Require a strong `SECRET_KEY` when `APP_ENV=production` and enable stricter production session cookie settings.
-- **Dependency Security**: Upgrade Flask and python-dotenv to versions with current CVE fixes.
-- **Upload Hardening**: Add a configurable request size limit for file uploads.
-- **Auth Hardening**: Add login/register rate limiting and a configurable registration toggle.
-- **Multi-user Hardening**: Store uploaded logos per user and restrict global currency add/delete actions to the configured database owner.
-- **Scalability Hardening**: Add pagination to invoice, client, and recurring invoice lists.
-- **Operational Hardening**: Move overdue invoice status updates to a CLI command and allow `DATABASE_URL` for future PostgreSQL deployments.
-- **Version Display**: Show the app version on auth pages as well as the main app footer.
-- **Email Settings Hardening**: Keep saved SMTP passwords out of rendered forms and validate SMTP port values server-side.
-- **PDF Template Hardening**: Validate template settings, make logo controls persist correctly, add a working reset action, and escape PDF text content before rendering.
+- See [ROADMAP.md](ROADMAP.md) for upcoming work (tax name, invoice prefix, payment terms, recurring scheduler, decimal precision, client portal).
 
 ## [1.3.0] - 2026-05-20
 

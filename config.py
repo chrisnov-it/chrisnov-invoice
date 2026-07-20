@@ -6,7 +6,7 @@ if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
 
 class Config:
     """Base configuration"""
-    APP_VERSION = "1.4.0"
+    APP_VERSION = "1.5.0"
     APP_ENV = os.environ.get('APP_ENV') or os.environ.get('FLASK_ENV', 'development')
     DEV_SECRET_KEY = 'dev-secret-key-change-in-production'
     SECRET_KEY = os.environ.get('SECRET_KEY') or DEV_SECRET_KEY

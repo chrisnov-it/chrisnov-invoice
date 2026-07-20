@@ -1,6 +1,6 @@
 # Chrisnov Invoice
 
-**Chrisnov Invoice** is a modern, open-source invoicing application designed for freelancers and small businesses. Built with Python and Flask, it provides a user-friendly web interface to manage clients, create professional invoices, and streamline your billing process.
+**Chrisnov Invoice** is a modern, open-source invoicing application designed for freelancers and small businesses of any kind — from IT shops to law practices and contractors. Built with Python and Flask, it provides a user-friendly web interface to manage clients, create professional invoices, and streamline your billing process.
 
 ![Chrisnov Invoice Dashboard](docs/images/dashboard.png)
 
@@ -10,6 +10,7 @@
 
 - **Client Management**: Easily add, edit, and organize your client details.
 - **Invoice Creation**: Generate professional invoices with custom line items, taxes, and notes.
+- **Customizable Item Units**: Tag each line item with a unit (hours, days, pieces, project, flat, months, weeks, km, set) and rename the quantity column to match your trade — ideal for lawyers, consultants, and contractors.
 - **PDF Generation**: Create and download beautiful, print-ready PDF invoices.
 - **Email Invoices**: Send invoices directly to your clients from the application.
 - **Dashboard**: Get a quick overview of your business with key financial metrics.
@@ -34,7 +35,7 @@
 If you don't want to deal with Python and terminal commands, just download the latest standalone version:
 
 1. Go to the [Releases](https://github.com/chrisnov-it/chrisnov-invoice/releases) page.
-2. Download `ChrisnovInvoice-Windows-v1.2.0.zip`.
+2. Download `ChrisnovInvoice-Windows-v1.5.0.zip`.
 3. Extract and run `ChrisnovInvoice.exe`.
 
 ---
@@ -140,15 +141,17 @@ Run `flask --app run mark-overdue` from cron/systemd timer if you want overdue i
   - Set your business name, address, and contact details.
   - Upload or remove your company logo.
   - Set a default tax rate and currency.
+  - Set the **Quantity Column Label** (e.g. "Qty", "Hours", "Days") used on invoices and PDFs.
 
 ### PDF Templates
 
 - **Path**: `Settings` → `PDF Templates`
 - **Actions**:
-  - Choose a template style (e.g., Professional, Modern).
+  - Choose a template style (e.g., Professional, Modern, Minimal, Elegant).
   - Customize the header and accent colors.
   - Adjust the logo position and visibility.
   - Define custom footer text for your invoices.
+  - Toggle the **unit column** on/off for generated PDFs.
 
 ### Email (SMTP)
 

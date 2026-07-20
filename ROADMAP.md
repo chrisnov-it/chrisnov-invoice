@@ -64,8 +64,31 @@ Welcome to the future of **Chrisnov Invoice**! We are committed to making this t
   - Supports QRIS, Virtual Account, Credit Card, and more.
   - Auto-update invoice status to "Paid" on payment confirmation.
   - Midtrans webhook for real-time status updates.
-  
-## ✨ Phase 2: Communication & Convenience
+
+## ✅ Completed (v1.5.0 "Multi-Business Ready")
+
+- [x] **Customizable Item Unit**: Add a `unit` column (hours, days, pieces, project, flat, months, weeks, km, set) to invoice and recurring invoice items.
+- [x] **Dynamic Quantity Label**: Rename the quantity column ("Qty" → "Hours", "Days", etc.) via the `ITEM_QTY_LABEL` setting.
+- [x] **Unit Column Toggle on PDF**: Show or hide the unit column on generated invoices via `PDF_SHOW_UNIT`.
+- [x] **Safe Schema Migration**: `init-db` adds missing columns automatically, preventing "no such column" deploy errors.
+- [x] **PDF Text Wrapping Fix**: Long descriptions wrap correctly in the Professional template.
+
+---
+
+## 🔧 Phase 0.5: Multi-Business Readiness (Next)
+
+Targeted quick wins so the app suits any profession (lawyers, consultants, contractors), not just IT services:
+
+1. **Customizable Tax Name**
+   - Add a `tax_name` field (e.g. "PPN", "PPh 23", "VAT", "Service Tax") per invoice, with a default in settings.
+2. **Invoice Number Prefix**
+   - Configurable `INVOICE_PREFIX` so numbers become `LA-2026-0001`, `CONS-2026-0001`, etc.
+3. **Payment Terms**
+   - Dropdown (Due on Receipt, Net 7/15/30/60) that auto-computes `due_date` from `issue_date`.
+4. **Recurring Scheduler**
+   - Run the existing `generate-recurring` CLI on a cron / systemd timer so retainer and subscription invoices generate automatically.
+
+## 🔐 Phase 0: Security & SaaS Readiness
 
 1. **Automated Payment Reminders ⏰**
    - Configurable "Gentle Nudge" system to automatically email clients 3 days after a due date.
@@ -80,6 +103,13 @@ Welcome to the future of **Chrisnov Invoice**! We are committed to making this t
    - Know exactly when a client has opened or viewed their invoice link.
 3. **Multi-user Support 👥**
    - Role-based access control (RBAC) for teams (Admin, Accountant, Sales).
+
+## 💡 Phase 4: Data Integrity & Scale
+
+1. **Money Precision Upgrade**
+   - Replace floating-point invoice amounts with `Decimal`/`Numeric` or integer minor units to avoid rounding drift (carried over from the original Phase 0 plan).
+2. **Migration Hygiene**
+   - Add a baseline Alembic revision and ensure existing databases are stamped correctly for future schema upgrades.
 
 ---
 
