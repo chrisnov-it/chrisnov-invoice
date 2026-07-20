@@ -9,23 +9,45 @@ from flask_login import current_user
 bp = Blueprint('invoices', __name__, url_prefix='/invoices')
 
 def generate_invoice_number():
-    """Generate unique invoice number"""
+    """Generate a unique invoice number for the current user.
+
+    Uses an INV-YYYYMM-NNNN format but guarantees global uniqueness for the
+    user by checking the full number (not just the current month) and looping
+    until a free number is found.
+    """
     today = datetime.now()
     prefix = f"INV-{today.strftime('%Y%m')}"
-    
-    # Get last invoice number for this month
-    last_invoice = Invoice.query.filter(
+
+    # Find the highest numeric suffix already used by this user (any month),
+    # so a number from an earlier session can never collide.
+    existing = Invoice.query.filter(
+        Invoice.user_id == current_user.id,
+        Invoice.invoice_number.like('INV-____-____')
+    ).all()
+    max_num = 0
+    for inv in existing:
+        tail = inv.invoice_number.rsplit('-', 1)[-1]
+        if tail.isdigit():
+            max_num = max(max_num, int(tail))
+
+    # Always at least beat this month's naive sequence.
+    month_invoices = Invoice.query.filter(
         Invoice.user_id == current_user.id,
         Invoice.invoice_number.like(f"{prefix}%")
-    ).order_by(Invoice.invoice_number.desc()).first()
-    
-    if last_invoice:
-        last_num = int(last_invoice.invoice_number.split('-')[-1])
-        new_num = last_num + 1
-    else:
-        new_num = 1
-    
-    return f"{prefix}-{new_num:04d}"
+    ).all()
+    for inv in month_invoices:
+        tail = inv.invoice_number.rsplit('-', 1)[-1]
+        if tail.isdigit():
+            max_num = max(max_num, int(tail))
+
+    candidate = f"{prefix}-{max_num + 1:04d}"
+
+    # Safety loop: if the candidate somehow already exists, keep incrementing.
+    while Invoice.query.filter_by(user_id=current_user.id, invoice_number=candidate).first():
+        max_num += 1
+        candidate = f"{prefix}-{max_num + 1:04d}"
+
+    return candidate
 
 @bp.route('/')
 def index():
@@ -68,9 +90,11 @@ def new():
                 flash('Invalid client selected.', 'error')
                 return redirect(url_for('invoices.new'))
 
-            # Create invoice
+            # Create invoice (generate a fresh unique number; do not trust the
+            # client-supplied hidden field, which can go stale between page load
+            # and submit).
             invoice = Invoice(
-                invoice_number=request.form['invoice_number'],
+                invoice_number=generate_invoice_number(),
                 user_id=current_user.id,
                 client_id=client.id,
                 issue_date=datetime.strptime(request.form['issue_date'], '%Y-%m-%d').date(),
@@ -101,7 +125,21 @@ def new():
             invoice.calculate_totals()
             
             db.session.add(invoice)
-            db.session.commit()
+
+            # Retry once on a rare number collision (e.g. concurrent submits).
+            from sqlalchemy.exc import IntegrityError
+            max_attempts = 5
+            attempt = 0
+            while True:
+                attempt += 1
+                try:
+                    db.session.commit()
+                    break
+                except IntegrityError as e:
+                    db.session.rollback()
+                    if attempt >= max_attempts or 'invoice_number' not in str(e):
+                        raise
+                    invoice.invoice_number = generate_invoice_number()
             
             flash('Invoice created successfully!', 'success')
             return redirect(url_for('invoices.view', id=invoice.id))
