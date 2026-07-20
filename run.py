@@ -126,22 +126,37 @@ def mark_overdue_invoices(user_id=None):
     click.echo(f"Marked {updated} invoice(s) as overdue.")
 
 def generate_invoice_number(user_id=None):
-    """Generate unique invoice number (copied from invoices.py for CLI use)"""
+    """Generate unique invoice number (copied from invoices.py for CLI use).
+
+    invoice_number is globally UNIQUE, so we consider every invoice in the
+    database, not just the given user's.
+    """
     today = datetime.now()
     prefix = f"INV-{today.strftime('%Y%m')}"
-    
-    last_invoice = Invoice.query.filter(
-        Invoice.user_id == user_id,
+
+    existing = Invoice.query.filter(
+        Invoice.invoice_number.like('INV-____-____')
+    ).all()
+    max_num = 0
+    for inv in existing:
+        tail = inv.invoice_number.rsplit('-', 1)[-1]
+        if tail.isdigit():
+            max_num = max(max_num, int(tail))
+
+    month_invoices = Invoice.query.filter(
         Invoice.invoice_number.like(f"{prefix}%")
-    ).order_by(Invoice.invoice_number.desc()).first()
-    
-    if last_invoice:
-        last_num = int(last_invoice.invoice_number.split('-')[-1])
-        new_num = last_num + 1
-    else:
-        new_num = 1
-    
-    return f"{prefix}-{new_num:04d}"
+    ).all()
+    for inv in month_invoices:
+        tail = inv.invoice_number.rsplit('-', 1)[-1]
+        if tail.isdigit():
+            max_num = max(max_num, int(tail))
+
+    candidate = f"{prefix}-{max_num + 1:04d}"
+    while Invoice.query.filter_by(invoice_number=candidate).first():
+        max_num += 1
+        candidate = f"{prefix}-{max_num + 1:04d}"
+
+    return candidate
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000)

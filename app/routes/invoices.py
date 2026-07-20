@@ -18,10 +18,9 @@ def generate_invoice_number():
     today = datetime.now()
     prefix = f"INV-{today.strftime('%Y%m')}"
 
-    # Find the highest numeric suffix already used by this user (any month),
-    # so a number from an earlier session can never collide.
+    # invoice_number is globally UNIQUE, so we must consider every invoice in
+    # the database (not just the current user's) when picking the next number.
     existing = Invoice.query.filter(
-        Invoice.user_id == current_user.id,
         Invoice.invoice_number.like('INV-____-____')
     ).all()
     max_num = 0
@@ -32,7 +31,6 @@ def generate_invoice_number():
 
     # Always at least beat this month's naive sequence.
     month_invoices = Invoice.query.filter(
-        Invoice.user_id == current_user.id,
         Invoice.invoice_number.like(f"{prefix}%")
     ).all()
     for inv in month_invoices:
@@ -43,7 +41,7 @@ def generate_invoice_number():
     candidate = f"{prefix}-{max_num + 1:04d}"
 
     # Safety loop: if the candidate somehow already exists, keep incrementing.
-    while Invoice.query.filter_by(user_id=current_user.id, invoice_number=candidate).first():
+    while Invoice.query.filter_by(invoice_number=candidate).first():
         max_num += 1
         candidate = f"{prefix}-{max_num + 1:04d}"
 
@@ -126,7 +124,7 @@ def new():
             
             db.session.add(invoice)
 
-            # Retry once on a rare number collision (e.g. concurrent submits).
+            # Retry on a rare number collision (e.g. concurrent submits).
             from sqlalchemy.exc import IntegrityError
             max_attempts = 5
             attempt = 0
@@ -140,12 +138,22 @@ def new():
                     if attempt >= max_attempts or 'invoice_number' not in str(e):
                         raise
                     invoice.invoice_number = generate_invoice_number()
-            
+
+            # The commit succeeded, but guard against a stale/detached object so
+            # we never build a URL with id=None. Re-fetch by invoice number.
+            invoice_id = invoice.id
+            if invoice_id is None:
+                fresh = Invoice.query.filter_by(
+                    user_id=current_user.id, invoice_number=invoice.invoice_number
+                ).first()
+                invoice_id = fresh.id if fresh else None
+
             flash('Invoice created successfully!', 'success')
-            return redirect(url_for('invoices.view', id=invoice.id))
+            return redirect(url_for('invoices.view', id=invoice_id))
             
         except Exception as e:
             db.session.rollback()
+            current_app.logger.exception('Error creating invoice')
             flash(f'Error creating invoice: {str(e)}', 'error')
     
     clients = Client.query.filter_by(user_id=current_user.id).order_by(Client.name).all()
