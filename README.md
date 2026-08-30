@@ -111,6 +111,17 @@ python build_exe.py
 
 After building, find your app in the `dist/ChrisnovInvoice` folder.
 
+### Creating a Release
+
+Pushing a version tag triggers a GitHub Actions workflow that builds the Windows `.exe` on a fresh runner and creates a draft release with the zip attached:
+
+```bash
+git tag v1.7.0
+git push origin v1.7.0
+```
+
+Once the workflow completes, review the draft release on GitHub and publish it.
+
 6. **Access the application**:
    Open your web browser and navigate to `http://127.0.0.1:5000`.
 
