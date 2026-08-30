@@ -259,6 +259,13 @@ def create_app(config_class=Config):
                 'max-age=31536000; includeSubDomains'
             )
 
+        # Cache static assets for 1 week (vendor CSS/fonts change rarely)
+        if request.path.startswith('/static/'):
+            if any(v in request.path for v in ['/vendor/', 'tailwind.min.css']):
+                response.headers['Cache-Control'] = 'public, max-age=604800, immutable'
+            else:
+                response.headers['Cache-Control'] = 'public, max-age=86400'
+
         return response
 
     # Register blueprints
