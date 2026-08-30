@@ -30,10 +30,10 @@ def add_column_if_missing(table_name, column_name, column_sql):
         click.echo(f"Added missing column {table_name}.{column_name}.")
 
 def ensure_ownership_columns():
-    add_column_if_missing('clients', 'user_id', 'user_id INTEGER NOT NULL')
+    add_column_if_missing('clients', 'user_id', 'user_id INTEGER NULL')
     add_column_if_missing('clients', 'website', 'website VARCHAR(255)')
-    add_column_if_missing('invoices', 'user_id', 'user_id INTEGER NOT NULL')
-    add_column_if_missing('recurring_invoices', 'user_id', 'user_id INTEGER NOT NULL')
+    add_column_if_missing('invoices', 'user_id', 'user_id INTEGER NULL')
+    add_column_if_missing('recurring_invoices', 'user_id', 'user_id INTEGER NULL')
     add_column_if_missing('invoice_items', 'unit', "unit VARCHAR(20) DEFAULT 'pieces'")
     add_column_if_missing('recurring_invoice_items', 'unit', "unit VARCHAR(20) DEFAULT 'pieces'")
 
@@ -180,6 +180,12 @@ def migrate_user_id(admin_id):
 
         if is_sqlite:
             _sqlite_enforce_not_null(table, column, inspector)
+        elif db.engine.url.drivername.startswith('mysql'):
+            col_type = str(col_info['type'])
+            db.session.execute(
+                text(f'ALTER TABLE {table} MODIFY COLUMN {column} {col_type} NOT NULL')
+            )
+            click.echo(f"  {table}.{column}: set NOT NULL")
         else:
             db.session.execute(
                 text(f'ALTER TABLE {table} ALTER COLUMN {column} SET NOT NULL')
