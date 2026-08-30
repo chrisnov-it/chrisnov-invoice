@@ -2,6 +2,8 @@
 
 **Chrisnov Invoice** is a modern, open-source invoicing application designed for freelancers and small businesses of any kind — from IT shops to law practices and contractors. Built with Python and Flask, it provides a user-friendly web interface to manage clients, create professional invoices, and streamline your billing process.
 
+🔗 **Live Demo**: [invoice.chrisnov.cloud](https://invoice.chrisnov.cloud)
+
 ![Chrisnov Invoice Dashboard](docs/images/dashboard.png)
 
 ## ✨ Key Features
@@ -51,8 +53,9 @@ If you don't want to deal with Python and terminal commands, just download the l
 
 ### 🛠️ For Developers
 
-- Python 3.8+
+- Python 3.9+
 - Pip (Python Package Manager)
+- Node.js (optional, only for rebuilding Tailwind CSS)
 
 ### Installation
 
@@ -85,6 +88,7 @@ If you don't want to deal with Python and terminal commands, just download the l
    This creates any missing tables, including user accounts for login/register.
 
 5. **Run the application**:
+
    - **Web Mode** (Standard):
 
      ```bash
@@ -110,6 +114,10 @@ After building, find your app in the `dist/ChrisnovInvoice` folder.
 6. **Access the application**:
    Open your web browser and navigate to `http://127.0.0.1:5000`.
 
+### Deploying to Production
+
+The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that deploys to a VPS over Tailscale SSH. It runs `init-db`, the `migrate-user-id` migration, restarts the service, and health-checks the app automatically on every push to `main`.
+
 ## ⚙️ Configuration
 
 All major configuration can be done through the web interface in the **Settings** section.
@@ -128,10 +136,20 @@ MAX_CONTENT_LENGTH=16777216
 MIDTRANS_SERVER_KEY=your-midtrans-server-key
 MIDTRANS_CLIENT_KEY=your-midtrans-client-key
 MIDTRANS_IS_PRODUCTION=false
+RATELIMIT_STORAGE_URI=memory://
 ```
 
 Use `ALLOW_REGISTRATION=false` to close public signup. Keep `DATABASE_URL` unset for the default SQLite database; set it to a PostgreSQL URL only when you are ready to migrate the database.
 Run `flask --app run mark-overdue` from cron/systemd timer if you want overdue invoice status updates to happen automatically.
+
+### Available CLI Commands
+
+| Command | Description |
+|---|---|
+| `flask --app run init-db` | Create tables and seed initial data |
+| `flask --app run migrate-user-id` | Assign orphaned rows to admin and enforce NOT NULL on `user_id` columns |
+| `flask --app run generate-recurring` | Generate invoices from recurring schedules |
+| `flask --app run mark-overdue` | Mark past-due invoices as overdue |
 
 ### Online Payments (Midtrans)
 
