@@ -27,7 +27,7 @@ class Client(db.Model):
     __tablename__ = 'clients'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
     name = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(200))
     website = db.Column(db.String(255))
@@ -61,17 +61,17 @@ class Invoice(db.Model):
     __tablename__ = 'invoices'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
     invoice_number = db.Column(db.String(50), nullable=False)
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
     issue_date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
     due_date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String(20), default='draft')  # draft, sent, unpaid, paid, overdue, cancelled
     currency = db.Column(db.String(3), default='IDR')  # Currency code (IDR, USD, EUR)
-    subtotal = db.Column(db.Float, default=0.0)
-    tax_rate = db.Column(db.Float, default=0.0)
-    tax_amount = db.Column(db.Float, default=0.0)
-    total = db.Column(db.Float, default=0.0)
+    subtotal = db.Column(db.Numeric(12, 2), default=0)
+    tax_rate = db.Column(db.Numeric(5, 4), default=0)
+    tax_amount = db.Column(db.Numeric(12, 2), default=0)
+    total = db.Column(db.Numeric(12, 2), default=0)
     notes = db.Column(db.Text)
     midtrans_order_id = db.Column(db.String(100), nullable=True, index=True)  # Midtrans payment tracking
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -117,9 +117,9 @@ class InvoiceItem(db.Model):
     invoice_id = db.Column(db.Integer, db.ForeignKey('invoices.id'), nullable=False)
     description = db.Column(db.String(500), nullable=False)
     unit = db.Column(db.String(20), default='pieces')
-    quantity = db.Column(db.Float, default=1.0)
-    rate = db.Column(db.Float, nullable=False)
-    amount = db.Column(db.Float, nullable=False)
+    quantity = db.Column(db.Numeric(10, 2), default=1)
+    rate = db.Column(db.Numeric(12, 2), nullable=False)
+    amount = db.Column(db.Numeric(12, 2), nullable=False)
     
     def __repr__(self):
         return f'<InvoiceItem {self.description}>'
@@ -142,7 +142,7 @@ class RecurringInvoice(db.Model):
     __tablename__ = 'recurring_invoices'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
     frequency = db.Column(db.String(20), nullable=False, default='monthly')  # daily, weekly, monthly, yearly
     interval = db.Column(db.Integer, nullable=False, default=1)
@@ -152,7 +152,7 @@ class RecurringInvoice(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     
     currency = db.Column(db.String(3), default='IDR')
-    tax_rate = db.Column(db.Float, default=0.0)
+    tax_rate = db.Column(db.Numeric(5, 4), default=0)
     notes = db.Column(db.Text)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -171,8 +171,8 @@ class RecurringInvoiceItem(db.Model):
     recurring_invoice_id = db.Column(db.Integer, db.ForeignKey('recurring_invoices.id'), nullable=False)
     description = db.Column(db.String(500), nullable=False)
     unit = db.Column(db.String(20), default='pieces')
-    quantity = db.Column(db.Float, default=1.0)
-    rate = db.Column(db.Float, nullable=False)
+    quantity = db.Column(db.Numeric(10, 2), default=1)
+    rate = db.Column(db.Numeric(12, 2), nullable=False)
 
     def __repr__(self):
         return f'<RecurringInvoiceItem {self.description}>'

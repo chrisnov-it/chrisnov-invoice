@@ -7,6 +7,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from app.models import Invoice
 from app import db
+from app.extensions import csrf
 from app.services.payment_service import PaymentService
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,7 @@ def check_status(invoice_id):
     return jsonify(result)
 
 @bp.route('/midtrans-webhook', methods=['POST'])
+@csrf.exempt
 def midtrans_webhook():
     """
     Midtrans payment notification webhook.

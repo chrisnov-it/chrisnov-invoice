@@ -1,0 +1,37 @@
+/* Inter font family — local copy for offline hosting */
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7SUc.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7SUc.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7SUc.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7SUc.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7SUc.woff2') format('woff2');
+}

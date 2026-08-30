@@ -28,6 +28,15 @@
 - **Internationalization (i18n)**: Fully supported English and Bahasa Indonesia interface, with persistent language selection.
 - **Search and Filter**: Quickly find invoices or clients with powerful search and filtering capabilities.
 
+### 🔒 Security (v1.6.0)
+
+- **Self-hosted assets**: Tailwind CSS, Font Awesome, and Google Fonts are bundled locally — no external CDN requests.
+- **Strict CSP**: Content Security Policy allows only `'self'` origins.
+- **Payment webhooks**: CSRF-protected endpoints exempted for Midtrans notifications.
+- **Invoice number safety**: Database-level locking prevents duplicate invoice numbers under concurrency.
+- **Secure headers**: HSTS, X-Frame-Options, X-Content-Type-Options, and more on every response.
+- **Decimal precision**: Currency amounts use fixed-point `NUMERIC` columns to avoid float rounding.
+
 ## 🚀 Getting Started
 
 ### 💻 For Regular Users (Windows)
@@ -35,7 +44,7 @@
 If you don't want to deal with Python and terminal commands, just download the latest standalone version:
 
 1. Go to the [Releases](https://github.com/chrisnov-it/chrisnov-invoice/releases) page.
-2. Download `ChrisnovInvoice-Windows-v1.5.0.zip`.
+2. Download `ChrisnovInvoice-Windows-v1.6.0.zip`.
 3. Extract and run `ChrisnovInvoice.exe`.
 
 ---
@@ -176,7 +185,11 @@ chrisnov-invoice/
 │   ├── models/         # SQLAlchemy database models
 │   ├── routes/         # Flask route blueprints for each feature
 │   ├── services/       # Business logic (PDF generation, email)
-│   ├── static/         # CSS, JavaScript, and images
+│   ├── static/
+│   │   ├── css/        # Custom stylesheets
+│   │   ├── js/         # Custom JavaScript
+│   │   ├── images/     # Logos and uploaded images
+│   │   └── vendor/     # Bundled third-party assets (Tailwind, Font Awesome, Inter)
 │   └── templates/      # Jinja2 HTML templates
 ├── docs/               # Markdown documentation files
 ├── instance/           # SQLite database file

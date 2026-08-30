@@ -137,5 +137,9 @@ sessions/
 app/static/images/logo.png
 *.zip
 
+# Node.js (Tailwind build tooling)
+node_modules/
+package-lock.json
+
 # Local development screenshots in the repository root
 /*.png

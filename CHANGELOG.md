@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2026-08-30
+
+### Security
+
+- **Midtrans Webhook CSRF Fix**: Added `@csrf.exempt` to the webhook endpoint and added it to the auth allowlist so payment notifications are no longer silently rejected with 400/302.
+- **Security Headers**: Added `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, and `Strict-Transport-Security` (production only) via `@app.after_request`.
+- **Invoice Number Race Condition**: Added `SELECT … FOR UPDATE` locking to prevent concurrent requests from generating duplicate invoice numbers.
+- **SQL Injection Prevention**: Added input validation to the `add_column_if_missing` migration helper in `run.py`.
+- **Thread-Safe Settings**: Removed all direct `current_app.config` mutations from settings routes; the per-request loader handles this safely.
+
+### Changed
+
+- **Tailwind Production Build**: Replaced the 407KB Tailwind Play CDN script with a pre-compiled 37KB static CSS file built via `npx tailwindcss`. Run `npm run build:css` after template changes.
+- **Local Asset Hosting**: Bundled Tailwind CSS, Font Awesome, and Google Fonts (Inter) locally under `app/static/vendor/` — no more external CDN dependencies.
+- **Strict CSP**: Content Security Policy now allows only `'self'` origins with no external domains.
+- **Currency Precision**: Changed monetary model fields from `db.Float` to `db.Numeric` to prevent floating-point rounding errors.
+
+### Fixed
+
+- **Data Migration**: New `flask --app run migrate-user-id` CLI command assigns orphaned NULL `user_id` rows to the admin user and enforces `NOT NULL` on `clients`, `invoices`, and `recurring_invoices` tables (SQLite: recreates table; PostgreSQL: `ALTER COLUMN`).
+- **Model Hardening**: `user_id` columns on `Client`, `Invoice`, and `RecurringInvoice` are now `nullable=False` for new databases.
+- **Dead Code Removal**: Removed unused `load_settings_from_db` function from `app/__init__.py`.
+- **Invoice Number Lock Scope**: `SELECT … FOR UPDATE` lock is now only acquired on POST (write path), not on GET (page render).
+
 ## [1.5.0] - 2026-07-20
 
 ### Added
@@ -51,7 +75,7 @@ All notable changes to this project will be documented in this file.
 
 ### Planned
 
-- See [ROADMAP.md](ROADMAP.md) for upcoming work (tax name, invoice prefix, payment terms, recurring scheduler, decimal precision, client portal).
+- See [ROADMAP.md](ROADMAP.md) for upcoming work (tax name, invoice prefix, payment terms, recurring scheduler, client portal).
 
 ## [1.3.0] - 2026-05-20
 

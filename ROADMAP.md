@@ -2,6 +2,38 @@
 
 Welcome to the future of **Chrisnov Invoice**! We are committed to making this the most elegant and efficient invoicing tool for freelancers and small businesses. Below is our vision for upcoming versions.
 
+## ✅ Completed (v1.6.0 "Harden & Optimize")
+
+- [x] **Midtrans Webhook Fix**: Added `@csrf.exempt` and auth allowlist so payment notifications are no longer silently rejected.
+- [x] **Security Headers**: CSP, X-Frame-Options, HSTS (production), X-Content-Type-Options, Referrer-Policy, Permissions-Policy on every response.
+- [x] **Invoice Number Race Condition Fix**: `SELECT … FOR UPDATE` locking prevents duplicate invoice numbers under concurrent requests.
+- [x] **SQL Injection Prevention**: Input validation on the `add_column_if_missing` migration helper.
+- [x] **Thread-Safe Settings**: Removed all `current_app.config` mutations from settings routes; per-request loader handles this safely.
+- [x] **Self-Hosted Assets**: Bundled Tailwind CSS, Font Awesome, and Google Fonts locally — no external CDN dependencies.
+- [x] **Tailwind Production Build**: Replaced 407KB play CDN script with a pre-compiled 37KB static CSS file.
+- [x] **Strict Content Security Policy**: CSP allows only `'self'` origins with no external domains.
+- [x] **Currency Precision**: Changed monetary model fields from `db.Float` to `db.Numeric` to prevent floating-point rounding errors.
+- [x] **user_id NOT NULL Enforcement**: New `migrate-user-id` CLI command assigns orphaned NULL rows and adds NOT NULL constraints.
+- [x] **Model Hardening**: `user_id` columns on `Client`, `Invoice`, and `RecurringInvoice` are now `nullable=False`.
+- [x] **Dead Code Removal**: Cleaned up unused `load_settings_from_db` function.
+- [x] **Deploy Workflow Update**: Added `migrate-user-id` to the GitHub Actions deploy pipeline.
+
+## ✅ Completed (v1.5.0 "Multi-Business Ready")
+
+- [x] **Customizable Item Unit**: Add a `unit` column (hours, days, pieces, project, flat, months, weeks, km, set) to invoice and recurring invoice items.
+- [x] **Dynamic Quantity Label**: Rename the quantity column ("Qty" → "Hours", "Days", etc.) via the `ITEM_QTY_LABEL` setting.
+- [x] **Unit Column Toggle on PDF**: Show or hide the unit column on generated invoices via `PDF_SHOW_UNIT`.
+- [x] **Safe Schema Migration**: `init-db` adds missing columns automatically, preventing "no such column" deploy errors.
+- [x] **PDF Text Wrapping Fix**: Long descriptions wrap correctly in the Professional template.
+
+## ✅ Completed (v1.4.0 "Payment Ready")
+
+- [x] **Online Payments Integration (Midtrans) 💸**
+  - Generate Snap payment links from any unpaid invoice.
+  - Supports QRIS, Virtual Account, Credit Card, and more.
+  - Auto-update invoice status to "Paid" on payment confirmation.
+  - Midtrans webhook for real-time status updates.
+
 ## ✅ Completed (v1.3.0 "Secure SaaS Foundation")
 
 - [x] **User Accounts**: Register, login, logout, password hashing, and route protection.
@@ -35,46 +67,6 @@ Welcome to the future of **Chrisnov Invoice**! We are committed to making this t
 
 ---
 
-## 🔐 Phase 0: Security & SaaS Readiness
-
-1. **Authentication Hardening**
-   - Add password reset, optional email verification, stronger production session settings, and account management screens.
-2. **Backup & Restore Hardening**
-   - Move toward user-scoped export/restore so hosted deployments never expose another user's records.
-3. **Money Precision Upgrade**
-   - Replace floating-point invoice amounts with `Decimal`/`Numeric` or integer minor units to avoid rounding drift.
-4. **Migration Hygiene**
-   - Add a baseline Alembic revision and ensure existing databases are stamped correctly for future schema upgrades.
-
----
-
-## 🚀 Phase 1: Visual & Intelligence Tracking
-
-1. **Interactive Dashboard 📊**
-   - Integrate Chart.js for visual revenue tracking, income vs. month, and client breakdowns.
-2. **Business Analytics**
-   - Detailed financial reports and tax summaries for end-of-year accounting.
-3. **Enhanced Search & Sorting**
-   - Advanced filtering for invoice lists (by status, date range, or client).
-
-## ✅ Completed (v1.4.0 "Payment Ready")
-
-- [x] **Online Payments Integration (Midtrans) 💸**
-  - Generate Snap payment links from any unpaid invoice.
-  - Supports QRIS, Virtual Account, Credit Card, and more.
-  - Auto-update invoice status to "Paid" on payment confirmation.
-  - Midtrans webhook for real-time status updates.
-
-## ✅ Completed (v1.5.0 "Multi-Business Ready")
-
-- [x] **Customizable Item Unit**: Add a `unit` column (hours, days, pieces, project, flat, months, weeks, km, set) to invoice and recurring invoice items.
-- [x] **Dynamic Quantity Label**: Rename the quantity column ("Qty" → "Hours", "Days", etc.) via the `ITEM_QTY_LABEL` setting.
-- [x] **Unit Column Toggle on PDF**: Show or hide the unit column on generated invoices via `PDF_SHOW_UNIT`.
-- [x] **Safe Schema Migration**: `init-db` adds missing columns automatically, preventing "no such column" deploy errors.
-- [x] **PDF Text Wrapping Fix**: Long descriptions wrap correctly in the Professional template.
-
----
-
 ## 🔧 Phase 0.5: Multi-Business Readiness (Next)
 
 Targeted quick wins so the app suits any profession (lawyers, consultants, contractors), not just IT services:
@@ -88,12 +80,25 @@ Targeted quick wins so the app suits any profession (lawyers, consultants, contr
 4. **Recurring Scheduler**
    - Run the existing `generate-recurring` CLI on a cron / systemd timer so retainer and subscription invoices generate automatically.
 
-## 🔐 Phase 0: Security & SaaS Readiness
+## 🔐 Phase 1: Security & SaaS Readiness
 
-1. **Automated Payment Reminders ⏰**
+1. **Authentication Hardening**
+   - Add password reset, optional email verification, stronger production session settings, and account management screens.
+2. **Automated Payment Reminders ⏰**
    - Configurable "Gentle Nudge" system to automatically email clients 3 days after a due date.
-2. **Branded HTML Email Templates ✉️**
+3. **Branded HTML Email Templates ✉️**
    - Move from plain-text emails to pixel-perfect, branded HTML templates that match your business style.
+4. **Migration Hygiene**
+   - Add a baseline Alembic revision and ensure existing databases are stamped correctly for future schema upgrades.
+
+## 📊 Phase 2: Visual & Intelligence Tracking
+
+1. **Interactive Dashboard 📊**
+   - Integrate Chart.js for visual revenue tracking, income vs. month, and client breakdowns.
+2. **Business Analytics**
+   - Detailed financial reports and tax summaries for end-of-year accounting.
+3. **Enhanced Search & Sorting**
+   - Advanced filtering for invoice lists (by status, date range, or client).
 
 ## 🌐 Phase 3: The "SaaS" Leap
 
@@ -103,13 +108,6 @@ Targeted quick wins so the app suits any profession (lawyers, consultants, contr
    - Know exactly when a client has opened or viewed their invoice link.
 3. **Multi-user Support 👥**
    - Role-based access control (RBAC) for teams (Admin, Accountant, Sales).
-
-## 💡 Phase 4: Data Integrity & Scale
-
-1. **Money Precision Upgrade**
-   - Replace floating-point invoice amounts with `Decimal`/`Numeric` or integer minor units to avoid rounding drift (carried over from the original Phase 0 plan).
-2. **Migration Hygiene**
-   - Add a baseline Alembic revision and ensure existing databases are stamped correctly for future schema upgrades.
 
 ---
 

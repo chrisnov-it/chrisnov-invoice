@@ -8,21 +8,34 @@ from flask_login import current_user
 
 bp = Blueprint('invoices', __name__, url_prefix='/invoices')
 
-def generate_invoice_number(user_id=None):
+def generate_invoice_number(user_id=None, lock=False):
     """Generate a unique invoice number for the current user.
 
-    Uses an INV-YYYYMM-NNNN format but guarantees uniqueness for the
-    user by checking the full number (not just the current month) and looping
-    until a free number is found.
+    Uses an INV-YYYYMM-NNNN format.  When *lock* is ``True`` (i.e. called
+    from the POST handler) a ``SELECT … FOR UPDATE`` lock serializes
+    concurrent requests at the database level.  On GET the lock is skipped
+    to avoid holding a database lock for the lifetime of the page render.
+    On SQLite, ``FOR UPDATE`` is a no-op anyway.
     """
     if user_id is None:
         user_id = current_user.id
-        
+
     today = datetime.now()
     prefix = f"INV-{today.strftime('%Y%m')}"
 
-    # invoice_number is unique per user_id, so we must consider every invoice in
-    # the database for this user when picking the next number.
+    # Lock all existing invoices for this user so a concurrent request
+    # cannot read the same max and generate a duplicate number.
+    # On PostgreSQL this acquires row-level locks; on SQLite it is a no-op.
+    if lock:
+        from sqlalchemy import text
+        db.session.execute(
+            text("SELECT 1 FROM invoices WHERE user_id = :uid FOR UPDATE"),
+            {"uid": user_id},
+        )
+
+    # Find the highest sequence number already used by this user.
+    # We look at both the standard INV-YYYYMM-NNNN pattern and any
+    # other pattern that starts with the current month prefix.
     existing = Invoice.query.filter(
         Invoice.user_id == user_id,
         Invoice.invoice_number.like('INV-____-____')
@@ -33,7 +46,6 @@ def generate_invoice_number(user_id=None):
         if tail.isdigit():
             max_num = max(max_num, int(tail))
 
-    # Always at least beat this month's naive sequence.
     month_invoices = Invoice.query.filter(
         Invoice.user_id == user_id,
         Invoice.invoice_number.like(f"{prefix}%")
@@ -44,11 +56,6 @@ def generate_invoice_number(user_id=None):
             max_num = max(max_num, int(tail))
 
     candidate = f"{prefix}-{max_num + 1:04d}"
-
-    # Safety loop: if the candidate somehow already exists, keep incrementing.
-    while Invoice.query.filter_by(user_id=user_id, invoice_number=candidate).first():
-        max_num += 1
-        candidate = f"{prefix}-{max_num + 1:04d}"
 
     return candidate
 
@@ -97,7 +104,7 @@ def new():
             # client-supplied hidden field, which can go stale between page load
             # and submit).
             invoice = Invoice(
-                invoice_number=generate_invoice_number(),
+                invoice_number=generate_invoice_number(lock=True),
                 user_id=current_user.id,
                 client_id=client.id,
                 issue_date=datetime.strptime(request.form['issue_date'], '%Y-%m-%d').date(),
@@ -142,7 +149,7 @@ def new():
                     db.session.rollback()
                     if attempt >= max_attempts or 'invoice_number' not in str(e):
                         raise
-                    invoice.invoice_number = generate_invoice_number()
+                    invoice.invoice_number = generate_invoice_number(lock=True)
 
             # The commit succeeded, but guard against a stale/detached object so
             # we never build a URL with id=None. Re-fetch by invoice number.

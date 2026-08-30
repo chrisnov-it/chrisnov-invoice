@@ -131,6 +131,7 @@ def create_app(config_class=Config):
             'auth.register',
             'static',
             'set_language',
+            'payment.midtrans_webhook',
         }
         if request.endpoint in allowed_endpoints or request.endpoint is None:
             return None
@@ -185,15 +186,6 @@ def create_app(config_class=Config):
     # The database initialization logic has been moved to a separate CLI command.
     # This prevents the app from trying to re-create tables on every startup.
 
-    def load_settings_from_db(app):
-        try:
-            for setting in Setting.query.all():
-                # Handle type conversion
-                if not setting.key.startswith('user:'):
-                    app.config[setting.key] = coerce_setting_value(setting.value)
-        except Exception as e:
-            # This can happen if the database is not yet initialized
-            print(f"Could not load settings from DB: {e}")
     # Load settings from DB at startup
     with app.app_context():
         load_global_settings()
@@ -228,6 +220,47 @@ def create_app(config_class=Config):
             logo_static_path=logo_static_path
         )
     
+    # ── Security headers ──────────────────────────────────────────────
+    @app.after_request
+    def set_security_headers(response):
+        # Prevent browsers from MIME-sniffing responses away from declared content type
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+
+        # Prevent the page from being embedded in an iframe (clickjacking protection)
+        response.headers['X-Frame-Options'] = 'DENY'
+
+        # Control referrer information leaked to third parties
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+
+        # Restrict browser features (camera, microphone, geolocation, etc.)
+        response.headers['Permissions-Policy'] = (
+            'camera=(), microphone=(), geolocation=(), payment=(self)'
+        )
+
+        # Content-Security-Policy
+        # NOTE: 'unsafe-inline' is required for the Tailwind config <script> and
+        # the <style> block in base.html.  Migrating to nonces or bundled JS
+        # would allow removing it from script-src.
+        csp_directives = [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline'",
+            "style-src 'self' 'unsafe-inline'",
+            "font-src 'self'",
+            "img-src 'self' data:",
+            "connect-src 'self'",
+        ]
+        response.headers['Content-Security-Policy'] = '; '.join(csp_directives)
+
+        # HSTS – only in production so local HTTP dev still works.
+        # max-age=31536000 (1 year); includeSubDomains if the deployment
+        # uses a dedicated subdomain (which it does).
+        if app.config.get('SESSION_COOKIE_SECURE'):
+            response.headers['Strict-Transport-Security'] = (
+                'max-age=31536000; includeSubDomains'
+            )
+
+        return response
+
     # Register blueprints
     from app.routes import auth, dashboard, clients, invoices, settings, recurring_invoices, payment
 

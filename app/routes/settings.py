@@ -5,7 +5,6 @@ from types import SimpleNamespace
 from werkzeug.utils import secure_filename
 from app.models import Setting, Currency
 from app import db
-from app.services.backup_service import BackupService
 from flask import send_file
 from flask_login import current_user
 from app.services.pdf_service import generate_invoice_pdf
@@ -187,7 +186,6 @@ def currencies():
             default_currency = request.form.get('default_currency')
             if Currency.query.filter_by(code=default_currency).first():
                 update_setting('DEFAULT_CURRENCY', default_currency)
-                current_app.config['DEFAULT_CURRENCY'] = default_currency
                 db.session.commit()
                 flash(f'Default currency updated to {default_currency}', 'success')
             else:
@@ -231,12 +229,8 @@ def email():
 
         for key, value in settings_to_update.items():
             update_setting(key, str(value))
-            if key in ['MAIL_USE_TLS', 'MAIL_USE_SSL']:
-                current_app.config[key] = value.lower() == 'true'
-            else:
-                current_app.config[key] = value
 
-        db.session.commit() # Commit changes to the database
+        db.session.commit()
 
         flash('Email settings updated successfully!', 'success')
         return redirect(url_for('settings.email'))
@@ -249,7 +243,6 @@ def business():
     if request.method == 'POST':
         if 'remove_logo' in request.form:
             if remove_current_user_logo():
-                current_app.config['LOGO_FILENAME'] = None
                 update_setting('LOGO_FILENAME', '')
                 flash('Logo removed successfully!', 'success')
             else:
@@ -265,7 +258,6 @@ def business():
                 os.makedirs(logo_dir, exist_ok=True)
                 filename = user_logo_filename(file.filename)
                 logo_setting = user_logo_setting_value(filename)
-                current_app.config['LOGO_FILENAME'] = logo_setting
                 update_setting('LOGO_FILENAME', logo_setting)
                 file.save(os.path.join(logo_dir, filename))
 
@@ -307,13 +299,9 @@ def business():
             'ITEM_QTY_LABEL': request.form.get('item_qty_label', 'Qty').strip() or 'Qty',
         }
 
-        # Update database and config
+        # Update database
         for key, value in settings_to_update.items():
             update_setting(key, value)
-            if key == 'TAX_RATE':
-                current_app.config[key] = float(value)
-            else:
-                current_app.config[key] = value
         
         db.session.commit()
 
@@ -418,13 +406,9 @@ def pdf_templates():
                 'ITEM_QTY_LABEL': item_qty_label,
             }
 
-        # Update database and config
+        # Update database
         for key, value in settings_to_update.items():
             update_setting(key, value)
-            if key in ('PDF_SHOW_LOGO', 'PDF_SHOW_UNIT'):
-                current_app.config[key] = (value.lower() == 'true')
-            else:
-                current_app.config[key] = value
         
         db.session.commit()
 
@@ -451,67 +435,3 @@ def pdf_template_preview():
     except Exception as e:
         flash(f'Error generating PDF preview: {str(e)}', 'error')
         return redirect(url_for('settings.pdf_templates'))
-
-@bp.route('/backup', methods=['GET'])
-def backup_index():
-    """Display backup and restore options"""
-    require_database_admin()
-    is_sqlite = current_app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite')
-    return render_template('settings/backup.html', is_sqlite=is_sqlite)
-
-@bp.route('/backup/export', methods=['GET'])
-def export_db():
-    """Download current database file"""
-    require_database_admin()
-    if not current_app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite'):
-        flash('Database export is only supported for SQLite.', 'error')
-        return redirect(url_for('settings.backup_index'))
-        
-    db_path = BackupService.get_db_path()
-    if os.path.exists(db_path):
-        timestamp = datetime.now().strftime('%Y-%m-%d_%H%M%S')
-        return send_file(
-            db_path,
-            as_attachment=True,
-            download_name=f"chrisnov_invoice_backup_{timestamp}.db"
-        )
-    flash('Database file not found.', 'error')
-    return redirect(url_for('settings.backup_index'))
-
-@bp.route('/backup/import', methods=['POST'])
-def import_db():
-    """Restore database from uploaded file"""
-    require_database_admin()
-    if not current_app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite'):
-        flash('Database import is only supported for SQLite.', 'error')
-        return redirect(url_for('settings.backup_index'))
-    if 'backup_file' not in request.files:
-        flash('No file uploaded.', 'error')
-        return redirect(url_for('settings.backup_index'))
-    
-    file = request.files['backup_file']
-    if file.filename == '':
-        flash('No file selected.', 'error')
-        return redirect(url_for('settings.backup_index'))
-    
-    filename = secure_filename(file.filename)
-    if file and filename.lower().endswith('.db'):
-        # Save temp file
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        temp_path = os.path.join(current_app.instance_path, f'temp_restore_{current_user.id}_{timestamp}.db')
-        file.save(temp_path)
-        
-        success, error = BackupService.restore_from_file(temp_path)
-        
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
-            
-        if success:
-            flash('Database restored successfully! Please restart the application if you encounter issues.', 'success')
-        else:
-            flash(f'Restore failed: {error}', 'error')
-    else:
-        flash('Invalid file format. Please upload a .db file.', 'error')
-        
-    return redirect(url_for('settings.backup_index'))
-
