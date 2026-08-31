@@ -154,10 +154,10 @@
                     <tr class="border-b border-gray-200 dark:border-gray-700 {% if loop.index is odd %}bg-gray-50 dark:bg-gray-700/50{% endif %}">
                         <td class="px-4 py-3 text-gray-800 dark:text-gray-200">{{ item.description }}</td>
                         {% if config.get('PDF_SHOW_UNIT', True) %}
-                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ item.unit }}</td>
+                        <td class="px-4 py-3 text-gray-700 dark:text-gray-200">{{ item.unit }}</td>
                         {% endif %}
-                        <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300">{{ "%.2f"|format(item.quantity) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300">{{ item.rate|format_currency(invoice.currency) }}
+                        <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-200">{{ "%.2f"|format(item.quantity) }}</td>
+                        <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-200">{{ item.rate|format_currency(invoice.currency) }}
                         </td>
                         <td class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">{{
                             item.amount|format_currency(invoice.currency) }}</td>
