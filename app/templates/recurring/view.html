@@ -67,7 +67,7 @@
                 </thead>
                 <tbody>
                     {% for item in recurring_invoice.items %}
-                    <tr class="border-b border-gray-200 dark:border-gray-700 {% if loop.index is odd %}bg-gray-50 dark:bg-gray-700/50{% endif %}">
+                    <tr class="border-b border-gray-200 dark:border-gray-700 {% if loop.index is odd %}bg-gray-50 dark:bg-gray-700{% endif %}">
                         <td class="px-4 py-3 text-gray-800 dark:text-gray-200">{{ item.description }}</td>
                         {% if config.get('PDF_SHOW_UNIT', True) %}
                         <td class="px-4 py-3 text-gray-700 dark:text-gray-200">{{ item.unit }}</td>
