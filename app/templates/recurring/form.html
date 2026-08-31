@@ -4,21 +4,21 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
-    <form method="POST" class="bg-white rounded-xl shadow-md p-8 space-y-8">
+    <form method="POST" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 space-y-8">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <!-- Header -->
         <div class="flex justify-between items-center">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">{% if recurring_invoice %}Edit Recurring Invoice{% else %}New Recurring Invoice{% endif %}</h1>
-                <p class="mt-2 text-gray-600">Set up automated invoices for your clients.</p>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{% if recurring_invoice %}Edit Recurring Invoice{% else %}New Recurring Invoice{% endif %}</h1>
+                <p class="mt-2 text-gray-600 dark:text-gray-400">Set up automated invoices for your clients.</p>
             </div>
-            <a href="{{ url_for('recurring_invoices.index') }}" class="text-gray-600 hover:text-gray-900">&larr; Back to Recurring Invoices</a>
+            <a href="{{ url_for('recurring_invoices.index') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">&larr; Back to Recurring Invoices</a>
         </div>
 
         <!-- Client Selection -->
         <div>
-            <label for="client_id" class="block text-xl font-semibold text-gray-900 mb-4">Client</label>
-            <select id="client_id" name="client_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+            <label for="client_id" class="block text-xl font-semibold text-gray-900 dark:text-white mb-4">Client</label>
+            <select id="client_id" name="client_id" required class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
                 <option value="">Select a client</option>
                 {% for client in clients %}
                 <option value="{{ client.id }}" {% if recurring_invoice and recurring_invoice.client_id == client.id %}selected="selected"{% endif %}>{{ client.name }}</option>
@@ -28,11 +28,11 @@
 
         <!-- Recurrence Schedule -->
         <div>
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Recurrence Schedule</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recurrence Schedule</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                    <label for="frequency" class="block text-sm font-medium text-gray-700 mb-2">Frequency</label>
-                    <select id="frequency" name="frequency" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                    <label for="frequency" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Frequency</label>
+                    <select id="frequency" name="frequency" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
                         <option value="daily" {% if recurring_invoice and recurring_invoice.frequency == 'daily' %}selected="selected"{% endif %}>Daily</option>
                         <option value="weekly" {% if recurring_invoice and recurring_invoice.frequency == 'weekly' %}selected="selected"{% endif %}>Weekly</option>
                         <option value="monthly" {% if (recurring_invoice and recurring_invoice.frequency == 'monthly') or not recurring_invoice %}selected="selected"{% endif %}>Monthly</option>
@@ -40,59 +40,59 @@
                     </select>
                 </div>
                 <div>
-                    <label for="interval" class="block text-sm font-medium text-gray-700 mb-2">Interval</label>
-                    <input type="number" id="interval" name="interval" value="{{ recurring_invoice.interval if recurring_invoice else 1 }}" min="1" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                    <label for="interval" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Interval</label>
+                    <input type="number" id="interval" name="interval" value="{{ recurring_invoice.interval if recurring_invoice else 1 }}" min="1" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
                 </div>
                 <div>
-                    <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-                    <input type="date" id="start_date" name="start_date" value="{{ recurring_invoice.start_date.strftime('%Y-%m-%d') if recurring_invoice else '' }}" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                    <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Start Date</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ recurring_invoice.start_date.strftime('%Y-%m-%d') if recurring_invoice else '' }}" required class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
                 </div>
                 <div>
-                    <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">End Date (Optional)</label>
-                    <input type="date" id="end_date" name="end_date" value="{{ recurring_invoice.end_date.strftime('%Y-%m-%d') if recurring_invoice and recurring_invoice.end_date else '' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                    <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">End Date (Optional)</label>
+                    <input type="date" id="end_date" name="end_date" value="{{ recurring_invoice.end_date.strftime('%Y-%m-%d') if recurring_invoice and recurring_invoice.end_date else '' }}" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
                 </div>
             </div>
         </div>
 
         <!-- Invoice Details -->
         <div>
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Invoice Details</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Invoice Details</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="currency" class="block text-sm font-medium text-gray-700 mb-2">Currency</label>
-                    <select id="currency" name="currency" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                    <label for="currency" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Currency</label>
+                    <select id="currency" name="currency" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
                         {% for code, currency in config.SUPPORTED_CURRENCIES.items() %}
                         <option value="{{ code }}" {% if (recurring_invoice and recurring_invoice.currency == code) or (not recurring_invoice and code == config.DEFAULT_CURRENCY) %}selected="selected"{% endif %}>{{ currency.name }} ({{ code }})</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div>
-                    <label for="tax_rate" class="block text-sm font-medium text-gray-700 mb-2">Tax Rate (%)</label>
-                    <input type="number" id="tax_rate" name="tax_rate" value="{{ (recurring_invoice.tax_rate * 100) if recurring_invoice else (config.TAX_RATE * 100) }}" step="0.01" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                    <label for="tax_rate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tax Rate (%)</label>
+                    <input type="number" id="tax_rate" name="tax_rate" value="{{ (recurring_invoice.tax_rate * 100) if recurring_invoice else (config.TAX_RATE * 100) }}" step="0.01" min="0" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
                 </div>
             </div>
         </div>
 
         <!-- Invoice Items -->
         <div>
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Invoice Items</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Invoice Items</h2>
             <div id="invoice-items" class="space-y-4">
                 <!-- Items will be added here dynamically -->
             </div>
-            <button type="button" id="add-item" class="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg transition">
+            <button type="button" id="add-item" class="mt-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg transition">
                 <i class="fas fa-plus mr-2"></i> Add Item
             </button>
         </div>
 
         <!-- Notes -->
         <div>
-            <label for="notes" class="block text-xl font-semibold text-gray-900 mb-4">Notes</label>
-            <textarea id="notes" name="notes" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Enter any notes here...">{{ recurring_invoice.notes if recurring_invoice }}</textarea>
+            <label for="notes" class="block text-xl font-semibold text-gray-900 dark:text-white mb-4">Notes</label>
+            <textarea id="notes" name="notes" rows="4" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400" placeholder="Enter any notes here...">{{ recurring_invoice.notes if recurring_invoice }}</textarea>
         </div>
 
         <!-- Submit -->
-        <div class="flex justify-end space-x-4 pt-6 border-t">
-            <a href="{{ url_for('recurring_invoices.index') }}" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</a>
+        <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <a href="{{ url_for('recurring_invoices.index') }}" class="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</a>
             <button type="submit" class="px-6 py-3 bg-primary hover:bg-blue-900 text-white font-semibold rounded-lg">Save Recurring Invoice</button>
         </div>
     </form>
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
         descriptionInput.setAttribute('aria-label', 'Item description');
         descriptionInput.required = true;
         descriptionInput.value = item ? item.description : '';
-        descriptionInput.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg';
+        descriptionInput.className = 'w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white';
         descriptionWrapper.appendChild(descriptionInput);
 
         const unitWrapper = document.createElement('div');
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const unitSelect = document.createElement('select');
         unitSelect.name = 'unit[]';
         unitSelect.setAttribute('aria-label', 'Item unit');
-        unitSelect.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg';
+        unitSelect.className = 'w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white';
         const units = {{ config.get('UNITS', ['hours','days','pieces','project','flat','months','weeks','km','set']) | tojson }};
         const defaultUnit = '{{ config.get("DEFAULT_UNIT", "pieces") }}';
         units.forEach(function(u) {
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
         quantityInput.step = '0.01';
         quantityInput.required = true;
         quantityInput.value = item ? item.quantity : 1;
-        quantityInput.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg';
+        quantityInput.className = 'w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white';
         quantityWrapper.appendChild(quantityInput);
 
         const rateWrapper = document.createElement('div');
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
         rateInput.step = '0.01';
         rateInput.required = true;
         rateInput.value = item ? item.rate : '';
-        rateInput.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg';
+        rateInput.className = 'w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white';
         rateWrapper.appendChild(rateInput);
 
         const actionWrapper = document.createElement('div');

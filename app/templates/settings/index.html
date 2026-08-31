@@ -3,16 +3,16 @@
 {% block title %}{{ _('Settings') }} - Invoice Management{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-8">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">{{ _('Settings') }}</h1>
-            <p class="mt-2 text-gray-600">{{ _("Manage your application settings and preferences.") }}</p>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ _('Settings') }}</h1>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">{{ _("Manage your application settings and preferences.") }}</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Currency Settings -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -22,8 +22,8 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <h3 class="text-lg font-medium text-gray-900">{{ _('Currency Settings') }}</h3>
-                        <p class="text-sm text-gray-500">{{ _("Configure default currency and exchange rates") }}</p>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ _('Currency Settings') }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ _("Configure default currency and exchange rates") }}</p>
                     </div>
                 </div>
                 <div class="mt-4">
@@ -35,7 +35,7 @@
             </div>
 
             <!-- Email Settings -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,8 +45,8 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <h3 class="text-lg font-medium text-gray-900">{{ _('Email Settings') }}</h3>
-                        <p class="text-sm text-gray-500">{{ _("Configure email sending for invoices") }}</p>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ _('Email Settings') }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ _("Configure email sending for invoices") }}</p>
                     </div>
                 </div>
                 <div class="mt-4">
@@ -58,7 +58,7 @@
             </div>
 
             <!-- PDF Templates -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,8 +68,8 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <h3 class="text-lg font-medium text-gray-900">{{ _('PDF Templates') }}</h3>
-                        <p class="text-sm text-gray-500">{{ _("Customize invoice PDF appearance") }}</p>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ _('PDF Templates') }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ _("Customize invoice PDF appearance") }}</p>
                     </div>
                 </div>
                 <div class="mt-4">
@@ -81,7 +81,7 @@
             </div>
 
             <!-- Business Information -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,8 +91,8 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <h3 class="text-lg font-medium text-gray-900">{{ _('Business Information') }}</h3>
-                        <p class="text-sm text-gray-500">{{ _("Update company details and branding") }}</p>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ _('Business Information') }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ _("Update company details and branding") }}</p>
                     </div>
                 </div>
                 <div class="mt-4">

@@ -31,11 +31,13 @@
     }
     .items-table td[data-label="Action"]::before { content: ""; }
     .items-table .amount { font-weight: 600; }
+    .dark .items-table tr.item-row { background: #1f2937; border-color: #374151; }
+    .dark .items-table td::before { color: #9ca3af; }
 }
 </style>
 <div class="max-w-5xl mx-auto">
-    <div class="bg-white rounded-lg shadow-md p-8">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">
             {% if invoice %}Edit Invoice{% else %}Create New Invoice{% endif %}
         </h2>
 
@@ -44,21 +46,21 @@
             <!-- Invoice Info -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="invoice_number" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="invoice_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Invoice Number <span class="text-red-500">*</span>
                     </label>
                     <input type="text" id="invoice_number" name="invoice_number" 
                            value="{% if invoice %}{{ invoice.invoice_number }}{% else %}{{ invoice_number }}{% endif %}" 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
                            placeholder="e.g. INV-202501-0001" required title="Invoice Number">
                 </div>
 
                 <div>
-                    <label for="client_id" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="client_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Client <span class="text-red-500">*</span>
                     </label>
                     <select id="client_id" name="client_id" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
                         <option value="">Select a client</option>
                         {% for client in clients %}
                         <option value="{{ client.id }}" {% if invoice and invoice.client_id == client.id %}selected{% endif %}>
@@ -69,38 +71,38 @@
                 </div>
 
                 <div>
-                    <label for="issue_date" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="issue_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Issue Date <span class="text-red-500">*</span>
                     </label>
                     <input type="date" id="issue_date" name="issue_date" required
                            value="{% if invoice %}{{ invoice.issue_date }}{% endif %}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
                 </div>
 
                 <div>
-                    <label for="due_date" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="due_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Due Date <span class="text-red-500">*</span>
                     </label>
                     <input type="date" id="due_date" name="due_date" required
                            value="{% if invoice %}{{ invoice.due_date }}{% else %}{{ default_due_date }}{% endif %}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
                 </div>
 
                 <div>
-                    <label for="tax_rate" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="tax_rate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Tax Rate (%)
                     </label>
                     <input type="number" id="tax_rate" name="tax_rate" step="0.01" min="0" inputmode="decimal"
                            value="{% if invoice %}{{ invoice.tax_rate * 100 }}{% else %}{{ config['TAX_RATE'] * 100 }}{% endif %}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
                 </div>
 
                 <div>
-                    <label for="currency" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="currency" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Currency
                     </label>
                     <select id="currency" name="currency"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
                         {% for code, currency in config.SUPPORTED_CURRENCIES.items() %}
                         <option value="{{ code }}" {% if invoice and invoice.currency == code %}selected{% elif not invoice and code == config.DEFAULT_CURRENCY %}selected{% endif %}>
                             {{ currency.symbol }} {{ currency.name }} ({{ code }})
@@ -113,7 +115,7 @@
             <!-- Invoice Items -->
             <div class="mt-8">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-gray-800">Items</h3>
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">Items</h3>
                     <button type="button" id="add-item-button" class="bg-secondary hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition text-sm">
                         <i class="fas fa-plus mr-1" aria-hidden="true"></i> Add Item
                     </button>
@@ -121,14 +123,14 @@
 
                 <div class="overflow-x-auto">
                     <table class="w-full items-table" id="itemsTable">
-                        <thead class="bg-gray-50 items-head">
+                        <thead class="bg-gray-50 dark:bg-gray-700 items-head">
                             <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase w-28">Unit</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase w-24">{{ config.get('ITEM_QTY_LABEL', 'Qty') }}</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase w-32">Rate</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase w-32">Amount</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase w-20">Action</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Description</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase w-28">Unit</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase w-24">{{ config.get('ITEM_QTY_LABEL', 'Qty') }}</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase w-32">Rate</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase w-32">Amount</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase w-20">Action</th>
                             </tr>
                         </thead>
                         <tbody id="itemsBody">
@@ -138,13 +140,13 @@
                                     <td class="px-4 py-2" data-label="Description">
                                         <label for="description_{{ loop.index0 }}" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Description</label>
                                         <input type="text" id="description_{{ loop.index0 }}" name="description[]" value="{{ item.description }}" required inputmode="text"
-                                               class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
                                                placeholder="Service description">
                                     </td>
                                     <td class="px-4 py-2" data-label="Unit">
                                         <label for="unit_{{ loop.index0 }}" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Unit</label>
                                         <select id="unit_{{ loop.index0 }}" name="unit[]"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary unit">
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white unit">
                                             {% for unit_opt in config.get('UNITS', ['hours','days','pieces','project','flat','months','weeks','km','set']) %}
                                             <option value="{{ unit_opt }}" {% if item.unit == unit_opt %}selected{% endif %}>{{ unit_opt }}</option>
                                             {% endfor %}
@@ -153,18 +155,18 @@
                                     <td class="px-4 py-2" data-label="{{ config.get('ITEM_QTY_LABEL', 'Qty') }}">
                                         <label for="quantity_{{ loop.index0 }}" class="block text-xs font-medium text-gray-500 md:hidden mb-1">{{ config.get('ITEM_QTY_LABEL', 'Qty') }}</label>
                                         <input type="number" id="quantity_{{ loop.index0 }}" name="quantity[]" value="{{ item.quantity }}" step="0.01" min="0" required inputmode="decimal"
-                                               class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary quantity"
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white quantity"
                                                placeholder="0">
                                     </td>
                                     <td class="px-4 py-2" data-label="Rate">
                                         <label for="rate_{{ loop.index0 }}" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Rate</label>
                                         <input type="number" name="rate[]" value="{{ item.rate }}" step="0.01" min="0" required inputmode="decimal"
-                                               id="rate_{{ loop.index0 }}" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary rate"
+                                               id="rate_{{ loop.index0 }}" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white rate"
                                                placeholder="0">
                                     </td>
                                     <td class="px-4 py-2" data-label="Amount">
                                         <label for="amount_{{ loop.index0 }}" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Amount</label>
-                                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 amount" 
+                                        <input type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-600 amount text-gray-900 dark:text-white" 
                                                id="amount_{{ loop.index0 }}"
                                                value="{{ '%.2f'|format(item.amount) }}" readonly>
                                     </td>
@@ -180,13 +182,13 @@
                                     <td class="px-4 py-2" data-label="Description">
                                         <label for="description_new" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Description</label>
                                         <input type="text" name="description[]" required inputmode="text"
-                                               id="description_new" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                                               id="description_new" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
                                                placeholder="Service description">
                                     </td>
                                     <td class="px-4 py-2" data-label="Unit">
                                         <label for="unit_new" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Unit</label>
                                         <select id="unit_new" name="unit[]"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary unit">
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white unit">
                                             {% for unit_opt in config.get('UNITS', ['hours','days','pieces','project','flat','months','weeks','km','set']) %}
                                             <option value="{{ unit_opt }}" {% if unit_opt == config.get('DEFAULT_UNIT', 'pieces') %}selected{% endif %}>{{ unit_opt }}</option>
                                             {% endfor %}
@@ -195,18 +197,18 @@
                                     <td class="px-4 py-2" data-label="{{ config.get('ITEM_QTY_LABEL', 'Qty') }}">
                                         <label for="quantity_new" class="block text-xs font-medium text-gray-500 md:hidden mb-1">{{ config.get('ITEM_QTY_LABEL', 'Qty') }}</label>
                                         <input type="number" name="quantity[]" value="1" step="0.01" min="0" required inputmode="decimal"
-                                               id="quantity_new" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary quantity"
+                                               id="quantity_new" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white quantity"
                                                placeholder="0">
                                     </td>
                                     <td class="px-4 py-2" data-label="Rate">
                                         <label for="rate_new" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Rate</label>
                                         <input type="number" name="rate[]" step="0.01" min="0" required inputmode="decimal"
-                                               id="rate_new" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary rate"
+                                               id="rate_new" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white rate"
                                                placeholder="0">
                                     </td>
                                     <td class="px-4 py-2" data-label="Amount">
                                         <label for="amount_new" class="block text-xs font-medium text-gray-500 md:hidden mb-1">Amount</label>
-                                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 amount" 
+                                        <input type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-600 amount text-gray-900 dark:text-white" 
                                                id="amount_new"
                                                value="0.00" readonly>
                                     </td>
@@ -225,15 +227,15 @@
             <!-- Totals -->
             <div class="mt-6 flex justify-end">
                 <div class="w-full md:w-1/2 space-y-3">
-                    <div class="flex justify-between text-gray-700">
+                    <div class="flex justify-between text-gray-700 dark:text-gray-300">
                         <span>Subtotal:</span>
                         <span class="font-semibold" id="subtotal"></span>
                     </div>
-                    <div class="flex justify-between text-gray-700">
+                    <div class="flex justify-between text-gray-700 dark:text-gray-300">
                         <span>Tax:</span>
                         <span class="font-semibold" id="taxAmount"></span>
                     </div>
-                    <div class="flex justify-between text-xl font-bold text-gray-900 pt-3 border-t-2 border-gray-300">
+                    <div class="flex justify-between text-xl font-bold text-gray-900 dark:text-white pt-3 border-t-2 border-gray-300 dark:border-gray-600">
                         <span>Total:</span>
                         <span id="total"></span>
                     </div>
@@ -242,11 +244,11 @@
 
             <!-- Notes -->
             <div>
-                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Notes
                 </label>
                 <textarea id="notes" name="notes" rows="3"
-                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
                           placeholder="Additional notes or payment instructions">{{ invoice.notes if invoice else '' }}</textarea>
             </div>
 
@@ -347,7 +349,7 @@ function addItem() {
             type: 'text',
             name: 'description[]',
             id: descriptionId,
-            className: 'w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary',
+            className: 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white',
             placeholder: 'Service description',
             inputmode: 'text',
             required: true
@@ -358,7 +360,7 @@ function addItem() {
     const unitSelect = document.createElement('select');
     unitSelect.name = 'unit[]';
     unitSelect.id = unitId;
-    unitSelect.className = 'w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary unit';
+    unitSelect.className = 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white unit';
     const units = {{ config.get('UNITS', ['hours','days','pieces','project','flat','months','weeks','km','set']) | tojson }};
     const defaultUnit = '{{ config.get("DEFAULT_UNIT", "pieces") }}';
     units.forEach(function(u) {
@@ -378,7 +380,7 @@ function addItem() {
             type: 'number',
             name: 'quantity[]',
             id: quantityId,
-            className: 'w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary quantity',
+            className: 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white quantity',
             value: '1',
             step: '0.01',
             min: '0',
@@ -395,7 +397,7 @@ function addItem() {
             type: 'number',
             name: 'rate[]',
             id: rateId,
-            className: 'w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary rate',
+            className: 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white rate',
             step: '0.01',
             min: '0',
             inputmode: 'decimal',
@@ -410,7 +412,7 @@ function addItem() {
         createInput({
             type: 'text',
             id: amountId,
-            className: 'w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 amount',
+            className: 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-600 amount text-gray-900 dark:text-white',
             value: '0.00',
             readOnly: true
         })
