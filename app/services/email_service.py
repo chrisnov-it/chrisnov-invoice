@@ -66,6 +66,10 @@ def send_invoice_email(invoice, recipient_email, subject=None, message=None):
             Phone: {current_app.config['BUSINESS_PHONE']}
             Email: {current_app.config['BUSINESS_EMAIL']}
             """
+            if current_app.config.get('BUSINESS_NPWP'):
+                message += f"NPWP: {current_app.config['BUSINESS_NPWP']}\n"
+            if current_app.config.get('BUSINESS_NIK'):
+                message += f"NIK: {current_app.config['BUSINESS_NIK']}\n"
         msg = Message(
             subject=subject,
             recipients=[recipient_email],

@@ -25,7 +25,7 @@ class User(UserMixin, db.Model):
 
 class Client(db.Model):
     __tablename__ = 'clients'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
     name = db.Column(db.String(200), nullable=False)
@@ -34,6 +34,9 @@ class Client(db.Model):
     phone = db.Column(db.String(50))
     address = db.Column(db.Text)
     company = db.Column(db.String(200))
+    nik = db.Column(db.String(30), nullable=True)
+    npwp = db.Column(db.String(30), nullable=True)
+    custom_fields = db.Column(db.Text, nullable=True, default='{}')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -44,6 +47,17 @@ class Client(db.Model):
     def __repr__(self):
         return f'<Client {self.name}>'
     
+    def get_custom_fields(self):
+        """Parse custom_fields JSON safely, always returns dict."""
+        import json
+        if not self.custom_fields:
+            return {}
+        try:
+            data = json.loads(self.custom_fields)
+            return data if isinstance(data, dict) else {}
+        except (ValueError, TypeError):
+            return {}
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -53,6 +67,9 @@ class Client(db.Model):
             'phone': self.phone,
             'address': self.address,
             'company': self.company,
+            'nik': self.nik,
+            'npwp': self.npwp,
+            'custom_fields': self.get_custom_fields(),
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
 

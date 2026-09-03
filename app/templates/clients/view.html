@@ -71,10 +71,34 @@
                 </p>
             </div>
             
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">NIK</h3>
+                <p class="text-lg text-gray-900 dark:text-white">{{ client.nik or '-' }}</p>
+            </div>
+
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">NPWP</h3>
+                <p class="text-lg text-gray-900 dark:text-white">{{ client.npwp or '-' }}</p>
+            </div>
+
             <div class="md:col-span-2">
                 <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Address</h3>
                 <p class="text-lg text-gray-900 dark:text-white whitespace-pre-line">{{ client.address or '-' }}</p>
             </div>
+
+            {% if client.get_custom_fields() %}
+            <div class="md:col-span-2">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Custom Fields</h3>
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {% for k, v in client.get_custom_fields().items() %}
+                    <div class="flex justify-between border-b border-gray-100 dark:border-gray-700 py-1">
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">{{ k }}</dt>
+                        <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ v }}</dd>
+                    </div>
+                    {% endfor %}
+                </dl>
+            </div>
+            {% endif %}
         </div>
     </div>
 

@@ -82,6 +82,15 @@
                 {% if config['BUSINESS_WEBSITE'] %}
                 <p class="text-gray-600 dark:text-gray-400 text-sm">Website: {{ config['BUSINESS_WEBSITE'] }}</p>
                 {% endif %}
+                {% if config.get('BUSINESS_NIK') %}
+                <p class="text-gray-600 dark:text-gray-400 text-sm">NIK: {{ config['BUSINESS_NIK'] }}</p>
+                {% endif %}
+                {% if config.get('BUSINESS_NPWP') %}
+                <p class="text-gray-600 dark:text-gray-400 text-sm">NPWP: {{ config['BUSINESS_NPWP'] }}</p>
+                {% endif %}
+                {% for k, v in get_business_custom_fields().items() %}
+                <p class="text-gray-600 dark:text-gray-400 text-sm">{{ k }}: {{ v }}</p>
+                {% endfor %}
             </div>
             <div class="text-right">
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">INVOICE</h2>
@@ -114,6 +123,15 @@
                     {% if invoice.client.phone %}
                     <p class="text-gray-600 dark:text-gray-400">{{ invoice.client.phone }}</p>
                     {% endif %}
+                    {% if invoice.client.nik %}
+                    <p class="text-gray-600 dark:text-gray-400">NIK: {{ invoice.client.nik }}</p>
+                    {% endif %}
+                    {% if invoice.client.npwp %}
+                    <p class="text-gray-600 dark:text-gray-400">NPWP: {{ invoice.client.npwp }}</p>
+                    {% endif %}
+                    {% for k, v in get_client_custom_fields(invoice.client).items() %}
+                    <p class="text-gray-600 dark:text-gray-400">{{ k }}: {{ v }}</p>
+                    {% endfor %}
                 </div>
             </div>
 

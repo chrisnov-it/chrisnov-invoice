@@ -38,6 +38,9 @@ class Config:
     BUSINESS_PHONE = "+62859-5536-2932"
     BUSINESS_EMAIL = "contact@chrisnov.com"
     BUSINESS_WEBSITE = "https://chrisnov.com"
+    BUSINESS_NIK = ""
+    BUSINESS_NPWP = ""
+    BUSINESS_CUSTOM_FIELDS = "{}"
     
     # Invoice Settings
     TAX_RATE = 0.11  # 11% tax

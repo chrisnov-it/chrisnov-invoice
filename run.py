@@ -32,6 +32,9 @@ def add_column_if_missing(table_name, column_name, column_sql):
 def ensure_ownership_columns():
     add_column_if_missing('clients', 'user_id', 'user_id INTEGER NULL')
     add_column_if_missing('clients', 'website', 'website VARCHAR(255)')
+    add_column_if_missing('clients', 'nik', 'nik VARCHAR(30)')
+    add_column_if_missing('clients', 'npwp', 'npwp VARCHAR(30)')
+    add_column_if_missing('clients', 'custom_fields', 'custom_fields TEXT')
     add_column_if_missing('invoices', 'user_id', 'user_id INTEGER NULL')
     add_column_if_missing('recurring_invoices', 'user_id', 'user_id INTEGER NULL')
     add_column_if_missing('invoice_items', 'unit', "unit VARCHAR(20) DEFAULT 'pieces'")

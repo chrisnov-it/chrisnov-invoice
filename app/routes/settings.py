@@ -1,8 +1,62 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, abort
 from datetime import datetime
+import json
 import os
+import re
 from types import SimpleNamespace
 from werkzeug.utils import secure_filename
+
+
+def validate_nik(value):
+    """NIK must be empty or 16 digits (Indonesian national ID)."""
+    value = (value or '').strip()
+    if not value:
+        return True, ''
+    digits = re.sub(r'\D', '', value)
+    if len(digits) != 16:
+        return False, 'NIK must contain exactly 16 digits.'
+    return True, digits
+
+
+def validate_npwp(value):
+    """NPWP must be empty or 15-16 digits (allows dotted/dashed formatting)."""
+    value = (value or '').strip()
+    if not value:
+        return True, ''
+    digits = re.sub(r'\D', '', value)
+    if len(digits) not in (15, 16):
+        return False, 'NPWP must contain 15 or 16 digits.'
+    return True, value
+
+
+def parse_custom_fields_from_request(max_fields=20):
+    """Collect custom_field_key[] / custom_field_value[] pairs into a dict."""
+    keys = request.form.getlist('custom_field_key')
+    values = request.form.getlist('custom_field_value')
+    result = {}
+    for k, v in zip(keys, values):
+        k = (k or '').strip()[:50]
+        v = (v or '').strip()[:500]
+        if not k or not v:
+            continue
+        if k in result:
+            continue
+        result[k] = v
+        if len(result) >= max_fields:
+            break
+    return result
+
+
+def get_business_custom_fields():
+    """Parse BUSINESS_CUSTOM_FIELDS setting safely for templates."""
+    raw = current_app.config.get('BUSINESS_CUSTOM_FIELDS', '{}')
+    if isinstance(raw, dict):
+        return raw
+    try:
+        data = json.loads(raw or '{}')
+        return data if isinstance(data, dict) else {}
+    except (ValueError, TypeError):
+        return {}
 from app.models import Setting, Currency
 from app import db
 from flask import send_file
@@ -108,7 +162,11 @@ def build_sample_invoice():
         address='123 Client Street\nJakarta, Indonesia',
         email='client@example.com',
         website='https://client.example.com',
-        phone='+62 812-0000-0000'
+        phone='+62 812-0000-0000',
+        nik='',
+        npwp='',
+        custom_fields='{}',
+        get_custom_fields=lambda: {}
     )
     items = [
         SimpleNamespace(description='Web Development Service', unit='project', quantity=1, rate=5000000, amount=5000000),
@@ -267,10 +325,21 @@ def business():
         business_phone = request.form.get('business_phone', '').strip()
         business_website = request.form.get('business_website', '').strip()
         business_address = request.form.get('business_address', '').strip()
+        business_nik_raw = request.form.get('business_nik', '').strip()
+        business_npwp_raw = request.form.get('business_npwp', '').strip()
 
         # Validate required fields
         if not business_name or not business_email or not business_address:
             flash('Business name, email, and address are required fields.', 'error')
+            return redirect(url_for('settings.business'))
+
+        nik_ok, nik_clean = validate_nik(business_nik_raw)
+        if not nik_ok:
+            flash(f'Invalid Business NIK: {nik_clean}' if nik_clean else 'Invalid Business NIK.', 'error')
+            return redirect(url_for('settings.business'))
+        npwp_ok, npwp_clean = validate_npwp(business_npwp_raw)
+        if not npwp_ok:
+            flash(f'Invalid Business NPWP: {npwp_clean}' if npwp_clean else 'Invalid Business NPWP.', 'error')
             return redirect(url_for('settings.business'))
 
         # Update tax rate and currency
@@ -287,6 +356,8 @@ def business():
             flash('Invalid currency selected.', 'error')
             return redirect(url_for('settings.business'))
 
+        business_custom = parse_custom_fields_from_request()
+
         # Create a dictionary of settings to update
         settings_to_update = {
             'BUSINESS_NAME': business_name,
@@ -294,6 +365,9 @@ def business():
             'BUSINESS_PHONE': business_phone,
             'BUSINESS_WEBSITE': business_website,
             'BUSINESS_ADDRESS': business_address,
+            'BUSINESS_NIK': nik_clean,
+            'BUSINESS_NPWP': npwp_clean,
+            'BUSINESS_CUSTOM_FIELDS': json.dumps(business_custom, ensure_ascii=False),
             'TAX_RATE': str(tax_rate),
             'DEFAULT_CURRENCY': default_currency,
             'ITEM_QTY_LABEL': request.form.get('item_qty_label', 'Qty').strip() or 'Qty',
@@ -308,7 +382,8 @@ def business():
         flash('Business information updated successfully!', 'success')
         return redirect(url_for('settings.business'))
 
-    return render_template('settings/business.html')
+    return render_template('settings/business.html',
+                           business_custom_fields=get_business_custom_fields())
 
 
 @bp.route('/email/test', methods=['POST'])

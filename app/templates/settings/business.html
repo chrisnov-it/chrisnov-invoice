@@ -59,6 +59,26 @@
                             value="{{ config['BUSINESS_WEBSITE'] }}" placeholder="https://yourwebsite.com"
                             class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
                     </div>
+
+                    <div>
+                        <label for="business_nik" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            NIK (National ID)
+                        </label>
+                        <input type="text" id="business_nik" name="business_nik" inputmode="numeric"
+                            value="{{ config.get('BUSINESS_NIK', '') }}" placeholder="16-digit NIK" maxlength="16"
+                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">16-digit Indonesian national ID (optional)</p>
+                    </div>
+
+                    <div>
+                        <label for="business_npwp" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            NPWP (Tax ID)
+                        </label>
+                        <input type="text" id="business_npwp" name="business_npwp"
+                            value="{{ config.get('BUSINESS_NPWP', '') }}" placeholder="e.g. 01.234.567.8-901.234"
+                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">15–16 digit tax ID, dots/dashes allowed (optional)</p>
+                    </div>
                 </div>
             </div>
 
@@ -113,6 +133,30 @@
                 </div>
             </div>
 
+            <!-- Custom Fields -->
+            <div>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Custom Fields</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Add extra label/value pairs shown on invoices and PDFs (e.g. Bank Account, Payment Terms). Max 20.</p>
+                <div id="custom-fields-list" class="space-y-3">
+                    {% if business_custom_fields %}
+                        {% for k, v in business_custom_fields.items() %}
+                        <div class="flex gap-3 custom-field-row">
+                            <input type="text" name="custom_field_key" value="{{ k }}" maxlength="50" placeholder="Label"
+                                class="w-1/3 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
+                            <input type="text" name="custom_field_value" value="{{ v }}" maxlength="500" placeholder="Value"
+                                class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
+                            <button type="button" onclick="this.parentElement.remove()" class="px-3 py-2 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" title="Remove" aria-label="Remove custom field">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <button type="button" onclick="addBusinessCustomField()" class="mt-4 px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg transition text-sm">
+                    <i class="fas fa-plus mr-2"></i> Add Custom Field
+                </button>
+            </div>
+
             <!-- Invoice Settings -->
             <div>
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Invoice Settings</h2>
@@ -154,6 +198,19 @@
                     </div>
                 </div>
             </div>
+
+            <script>
+            function addBusinessCustomField() {
+                const list = document.getElementById('custom-fields-list');
+                if (list.children.length >= 20) return;
+                const row = document.createElement('div');
+                row.className = 'flex gap-3 custom-field-row';
+                row.innerHTML = '<input type="text" name="custom_field_key" maxlength="50" placeholder="Label" class="w-1/3 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">' +
+                    '<input type="text" name="custom_field_value" maxlength="500" placeholder="Value" class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">' +
+                    '<button type="button" onclick="this.parentElement.remove()" class="px-3 py-2 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" title="Remove" aria-label="Remove custom field"><i class="fas fa-trash"></i></button>';
+                list.appendChild(row);
+            }
+            </script>
 
             <!-- Submit Buttons -->
             <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">

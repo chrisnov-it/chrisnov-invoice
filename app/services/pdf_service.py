@@ -26,6 +26,60 @@ def logo_alignment(config, fallback=TA_LEFT):
 def client_website(client):
     return getattr(client, 'website', None)
 
+
+def _parse_custom_fields(raw):
+    """Parse custom fields JSON/dict safely, always returns dict."""
+    if not raw:
+        return {}
+    if isinstance(raw, dict):
+        return {str(k): str(v) for k, v in raw.items() if k and v}
+    try:
+        import json as _json
+        data = _json.loads(raw)
+        if isinstance(data, dict):
+            return {str(k): str(v) for k, v in data.items() if k and v}
+    except (ValueError, TypeError):
+        pass
+    return {}
+
+
+def business_custom_fields(config):
+    return _parse_custom_fields(config.get('BUSINESS_CUSTOM_FIELDS', '{}'))
+
+
+def client_custom_fields(client):
+    if hasattr(client, 'get_custom_fields'):
+        try:
+            data = client.get_custom_fields()
+            if isinstance(data, dict):
+                return {str(k): str(v) for k, v in data.items() if k and v}
+        except Exception:
+            pass
+    return _parse_custom_fields(getattr(client, 'custom_fields', None))
+
+
+def _business_identity_lines(config):
+    """Return list of Paragraph-ready strings for NIK/NPWP + custom fields."""
+    lines = []
+    if config.get('BUSINESS_NIK'):
+        lines.append(f"NIK: {config['BUSINESS_NIK']}")
+    if config.get('BUSINESS_NPWP'):
+        lines.append(f"NPWP: {config['BUSINESS_NPWP']}")
+    for k, v in business_custom_fields(config).items():
+        lines.append(f"{k}: {v}")
+    return lines
+
+
+def _client_identity_lines(client):
+    lines = []
+    if getattr(client, 'nik', None):
+        lines.append(f"NIK: {client.nik}")
+    if getattr(client, 'npwp', None):
+        lines.append(f"NPWP: {client.npwp}")
+    for k, v in client_custom_fields(client).items():
+        lines.append(f"{k}: {v}")
+    return lines
+
 def format_currency(amount, currency_code, config):
     """Format currency amount based on currency settings"""
     if currency_code not in config['SUPPORTED_CURRENCIES']:
@@ -168,6 +222,8 @@ def generate_professional_pdf(invoice, config, buffer):
 
     if config.get('BUSINESS_WEBSITE'):
         header_elements.append(Paragraph(f"Website: {pdf_text(config['BUSINESS_WEBSITE'])}", normal_style))
+    for line in _business_identity_lines(config):
+        header_elements.append(Paragraph(pdf_text(line), normal_style))
 
     pdf_status = 'unpaid' if invoice.status == 'draft' else invoice.status
 
@@ -196,16 +252,19 @@ def generate_professional_pdf(invoice, config, buffer):
     elements.append(Spacer(1, 0.2*inch))
 
     # Horizontal layout: Bill To and Invoice Details
+    _bill_to = [
+        Paragraph("<b>Bill To:</b>", heading_style),
+        Paragraph(f"<b>{pdf_text(invoice.client.name)}</b>", normal_style),
+        Paragraph(pdf_text(invoice.client.company), normal_style),
+        Paragraph(pdf_text(invoice.client.address), normal_style),
+        Paragraph(pdf_text(invoice.client.email), normal_style),
+        Paragraph(pdf_text(client_website(invoice.client)), normal_style),
+        Paragraph(pdf_text(invoice.client.phone), normal_style),
+    ]
+    for _line in _client_identity_lines(invoice.client):
+        _bill_to.append(Paragraph(pdf_text(_line), normal_style))
     horizontal_data = [[
-        [
-            Paragraph("<b>Bill To:</b>", heading_style),
-            Paragraph(f"<b>{pdf_text(invoice.client.name)}</b>", normal_style),
-            Paragraph(pdf_text(invoice.client.company), normal_style),
-            Paragraph(pdf_text(invoice.client.address), normal_style),
-            Paragraph(pdf_text(invoice.client.email), normal_style),
-            Paragraph(pdf_text(client_website(invoice.client)), normal_style),
-            Paragraph(pdf_text(invoice.client.phone), normal_style)
-        ],
+        _bill_to,
         [
             Paragraph("<b>Invoice Details:</b>", heading_style),
             Table([
@@ -356,6 +415,10 @@ def generate_modern_pdf(invoice, config, buffer):
         Paragraph(pdf_text(invoice.client.address), normal_style),
         Paragraph(pdf_text(invoice.client.email), normal_style),
         Paragraph(pdf_text(client_website(invoice.client)), normal_style),
+    ])
+    for _line in _client_identity_lines(invoice.client):
+        sidebar_elements.append(Paragraph(pdf_text(_line), normal_style))
+    sidebar_elements.extend([
         Spacer(1, 0.3*inch),
         Paragraph("DETAILS", heading_style),
         Paragraph(f"<b>Issue Date:</b> {invoice.issue_date.strftime('%d %b %Y')}", normal_style),
@@ -368,9 +431,13 @@ def generate_modern_pdf(invoice, config, buffer):
         Paragraph(f"<b>{pdf_text(config.get('BUSINESS_NAME', 'Your Business'))}</b>", ParagraphStyle('BusinessName', fontName=main_font_bold, fontSize=16, alignment=TA_RIGHT, leading=20, spaceAfter=6)),
         Paragraph(pdf_text(config.get('BUSINESS_ADDRESS', 'Your Address')), ParagraphStyle('BusinessAddress', parent=normal_style, alignment=TA_RIGHT)),
         Paragraph(pdf_text(config.get('BUSINESS_EMAIL', 'your@email.com')), ParagraphStyle('BusinessEmail', parent=normal_style, alignment=TA_RIGHT)),
+    ]
+    for _line in _business_identity_lines(config):
+        main_elements.append(Paragraph(pdf_text(_line), ParagraphStyle('BusinessExtra', parent=normal_style, alignment=TA_RIGHT)))
+    main_elements.extend([
         Spacer(1, 1.5*inch),
         Paragraph("ITEMS & SERVICES", ParagraphStyle('ItemsHeader', fontName=main_font_bold, fontSize=14, textColor=colors.black, spaceAfter=12)),
-    ]
+    ])
 
     # Items table
     show_unit = config.get('PDF_SHOW_UNIT', True)
@@ -498,17 +565,20 @@ def generate_minimal_pdf(invoice, config, buffer):
     elements.append(Spacer(1, 0.1*inch))
 
     # Business & Client Info
-    info_data = [[
-        [
-            Paragraph(pdf_text(config.get('BUSINESS_ADDRESS', 'Your Address')), normal_style),
-            Paragraph(pdf_text(config.get('BUSINESS_EMAIL', 'your@email.com')), normal_style),
-        ],
-        [
-            Paragraph(f"<b>{pdf_text(invoice.client.name)}</b>", normal_style),
-            Paragraph(pdf_text(invoice.client.address), normal_style),
-            Paragraph(pdf_text(client_website(invoice.client)), normal_style),
-        ]
-    ]]
+    _biz_col = [
+        Paragraph(pdf_text(config.get('BUSINESS_ADDRESS', 'Your Address')), normal_style),
+        Paragraph(pdf_text(config.get('BUSINESS_EMAIL', 'your@email.com')), normal_style),
+    ]
+    for _line in _business_identity_lines(config):
+        _biz_col.append(Paragraph(pdf_text(_line), normal_style))
+    _client_col = [
+        Paragraph(f"<b>{pdf_text(invoice.client.name)}</b>", normal_style),
+        Paragraph(pdf_text(invoice.client.address), normal_style),
+        Paragraph(pdf_text(client_website(invoice.client)), normal_style),
+    ]
+    for _line in _client_identity_lines(invoice.client):
+        _client_col.append(Paragraph(pdf_text(_line), normal_style))
+    info_data = [[_biz_col, _client_col]]
     info_table = Table(info_data, colWidths=[3.5*inch, 3.5*inch])
     info_table.setStyle(TableStyle([('VALIGN', (0,0), (-1,-1), 'TOP')]))
     elements.append(info_table)
@@ -636,7 +706,9 @@ def generate_elegant_pdf(invoice, config, buffer):
     elements.append(Paragraph(pdf_text(config.get('BUSINESS_NAME', 'Your Business').upper()), title_style))
     elements.append(Paragraph(pdf_text(config.get('BUSINESS_ADDRESS', 'Your Address')), subtitle_style))
     elements.append(Paragraph(pdf_text(config.get('BUSINESS_EMAIL', 'your@email.com')), subtitle_style))
-    
+    for _line in _business_identity_lines(config):
+        elements.append(Paragraph(pdf_text(_line), subtitle_style))
+
     elements.append(Spacer(1, 0.4*inch))
     elements.append(Paragraph("INVOICE", invoice_label_style))
     elements.append(Spacer(1, 0.2*inch))
@@ -650,6 +722,8 @@ def generate_elegant_pdf(invoice, config, buffer):
         Paragraph(pdf_text(invoice.client.address), normal_style),
         Paragraph(pdf_text(client_website(invoice.client)), normal_style),
     ]
+    for _line in _client_identity_lines(invoice.client):
+        col1.append(Paragraph(pdf_text(_line), normal_style))
 
     # Column 2: (Empty spacer)
     col2 = []

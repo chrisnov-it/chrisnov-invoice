@@ -15,6 +15,9 @@ USER_SETTING_KEYS = [
     'BUSINESS_PHONE',
     'BUSINESS_EMAIL',
     'BUSINESS_WEBSITE',
+    'BUSINESS_NIK',
+    'BUSINESS_NPWP',
+    'BUSINESS_CUSTOM_FIELDS',
     'TAX_RATE',
     'DEFAULT_CURRENCY',
     'ITEM_QTY_LABEL',
@@ -211,13 +214,44 @@ def create_app(config_class=Config):
                 return filename.replace('\\', '/')
             return 'images/logo.png'
 
+        def get_business_custom_fields():
+            import json as _json
+            raw = app.config.get('BUSINESS_CUSTOM_FIELDS', '{}')
+            if isinstance(raw, dict):
+                return raw
+            try:
+                data = _json.loads(raw or '{}')
+                return data if isinstance(data, dict) else {}
+            except (ValueError, TypeError):
+                return {}
+
+        def get_client_custom_fields(client):
+            if client is None:
+                return {}
+            if hasattr(client, 'get_custom_fields'):
+                try:
+                    return client.get_custom_fields()
+                except Exception:
+                    return {}
+            import json as _json
+            raw = getattr(client, 'custom_fields', '{}')
+            if isinstance(raw, dict):
+                return raw
+            try:
+                data = _json.loads(raw or '{}')
+                return data if isinstance(data, dict) else {}
+            except (ValueError, TypeError):
+                return {}
+
         return dict(
             config=app.config,
             current_locale=get_locale(),
             current_user=current_user,
             can_manage_database=current_user.is_authenticated and current_user.id == app.config.get('DATABASE_ADMIN_USER_ID', 1),
             pagination_url=pagination_url,
-            logo_static_path=logo_static_path
+            logo_static_path=logo_static_path,
+            get_business_custom_fields=get_business_custom_fields,
+            get_client_custom_fields=get_client_custom_fields
         )
     
     # ── Security headers ──────────────────────────────────────────────
